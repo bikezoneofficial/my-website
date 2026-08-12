@@ -1,5 +1,255 @@
 <!doctype html>
-<html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Bike Zone Admin</title><style>body{margin:0;background:#090909;color:#fff;font-family:Arial}.box{max-width:760px;margin:30px auto;padding:20px}.panel{background:#151515;border:1px solid #292929;border-radius:16px;padding:20px;margin-bottom:18px}input,textarea{width:100%;box-sizing:border-box;padding:12px;margin:6px 0;background:#0d0d0d;color:#fff;border:1px solid #333;border-radius:9px}.btn{padding:12px 17px;border:0;border-radius:9px;background:#ff6b00;color:#fff;font-weight:700;margin:6px 4px 0 0}.muted{color:#999}</style></head>
-<body><div class="box"><div class="panel"><h1>🔐 Bike Zone Admin</h1><p class="muted">Secure Supabase login will be connected to this panel.</p><input type="email" placeholder="Admin email"><input type="password" placeholder="Password"><button class="btn" onclick="alert('Supabase Auth connection is the next deployment step.')">Login</button></div>
-<div class="panel"><h2>Admin features</h2><p>➕ Add bike &nbsp; 📸 Upload photo &nbsp; ✏️ Edit details &nbsp; 🗑️ Delete &nbsp; 🎨 Change logo</p><p class="muted">No password is stored in this HTML.</p></div></div></body></html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <title>Bike Zone Admin</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    body{
+      margin:0;
+      background:#090909;
+      color:#fff;
+      font-family:Arial,sans-serif;
+    }
+
+    .box{
+      max-width:760px;
+      margin:30px auto;
+      padding:20px;
+    }
+
+    .panel{
+      background:#151515;
+      border:1px solid #292929;
+      border-radius:16px;
+      padding:20px;
+      margin-bottom:18px;
+    }
+
+    input{
+      width:100%;
+      box-sizing:border-box;
+      padding:12px;
+      margin:6px 0;
+      background:#0d0d0d;
+      color:#fff;
+      border:1px solid #333;
+      border-radius:9px;
+    }
+
+    button{
+      padding:12px 17px;
+      border:0;
+      border-radius:9px;
+      background:#ff6b00;
+      color:#fff;
+      font-weight:700;
+      margin:6px 4px 0 0;
+    }
+
+    .logout{
+      background:#444;
+    }
+
+    .muted{
+      color:#999;
+    }
+
+    #adminPanel{
+      display:none;
+    }
+
+    #message{
+      margin-top:12px;
+      color:#ffb000;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="box">
+
+  <!-- LOGIN -->
+  <div class="panel" id="loginPanel">
+    <h1>🔐 Bike Zone Admin</h1>
+
+    <p class="muted">
+      Admin login
+    </p>
+
+    <input
+      type="email"
+      id="email"
+      placeholder="Admin email"
+    >
+
+    <input
+      type="password"
+      id="password"
+      placeholder="Password"
+    >
+
+    <button onclick="login()">
+      Login
+    </button>
+
+    <div id="message"></div>
+  </div>
+
+
+  <!-- ADMIN -->
+  <div class="panel" id="adminPanel">
+
+    <h1>🚲 Bike Zone Admin</h1>
+
+    <p>
+      Welcome, Admin!
+    </p>
+
+    <button class="logout" onclick="logout()">
+      Logout
+    </button>
+
+    <hr>
+
+    <h2>Admin Features</h2>
+
+    <p>
+      ➕ Add bike
+    </p>
+
+    <p>
+      📸 Upload photo
+    </p>
+
+    <p>
+      ✏️ Edit bike details
+    </p>
+
+    <p>
+      🗑️ Delete bike
+    </p>
+
+    <p>
+      🎨 Change logo
+    </p>
+
+  </div>
+
+</div>
+
+
+<script>
+
+  // SUPABASE CONNECTION
+  const SUPABASE_URL =
+    "https://jwvuyvqejoweyyhexonh.supabase.co";
+
+  const SUPABASE_PUBLISHABLE_KEY =
+    "sb_publishable_9xr4-mJuetYNknBqMVvcYA_7OzE6CDm";
+
+  const supabaseClient =
+    window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_PUBLISHABLE_KEY
+    );
+
+
+  // LOGIN
+  async function login(){
+
+    const email =
+      document.getElementById("email").value.trim();
+
+    const password =
+      document.getElementById("password").value;
+
+    const message =
+      document.getElementById("message");
+
+    if(!email || !password){
+      message.textContent =
+        "Email aur password dono bharo.";
+      return;
+    }
+
+    message.textContent =
+      "Login ho raha hai...";
+
+    const { data, error } =
+      await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+
+    if(error){
+
+      message.textContent =
+        "Login failed: " + error.message;
+
+      return;
+    }
+
+    message.textContent =
+      "Login successful!";
+
+    showAdmin();
+
+  }
+
+
+  // SHOW ADMIN
+  function showAdmin(){
+
+    document.getElementById("loginPanel")
+      .style.display = "none";
+
+    document.getElementById("adminPanel")
+      .style.display = "block";
+
+  }
+
+
+  // LOGOUT
+  async function logout(){
+
+    await supabaseClient.auth.signOut();
+
+    document.getElementById("adminPanel")
+      .style.display = "none";
+
+    document.getElementById("loginPanel")
+      .style.display = "block";
+
+    document.getElementById("message")
+      .textContent = "";
+
+  }
+
+
+  // CHECK EXISTING LOGIN
+  async function checkLogin(){
+
+    const { data } =
+      await supabaseClient.auth.getSession();
+
+    if(data.session){
+
+      showAdmin();
+
+    }
+
+  }
+
+
+  checkLogin();
+
+</script>
+
+</body>
+</html>
