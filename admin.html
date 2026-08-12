@@ -1,389 +1,385 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Bike Zone Admin</title>
+  <title>Bike Zone Admin</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<style>
-*{
-  box-sizing:border-box;
-}
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-body{
-  margin:0;
-  background:#000;
-  color:#fff;
-  font-family:Arial,Helvetica,sans-serif;
-}
+    body {
+      margin: 0;
+      background: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+    }
 
-.container{
-  width:100%;
-  max-width:900px;
-  margin:auto;
-  padding:25px 16px 60px;
-}
+    .container {
+      width: 100%;
+      max-width: 900px;
+      margin: auto;
+      padding: 20px 15px 60px;
+    }
 
-.card{
-  background:#111;
-  border:1px solid #333;
-  border-radius:18px;
-  padding:25px;
-  margin-bottom:20px;
-}
+    .card {
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 18px;
+      padding: 22px;
+      margin-bottom: 18px;
+    }
 
-h1,h2,h3{
-  margin-top:0;
-}
+    h1, h2, h3 {
+      margin-top: 0;
+    }
 
-input,
-textarea{
-  width:100%;
-  padding:15px;
-  margin:7px 0;
-  background:#000;
-  color:#fff;
-  border:1px solid #444;
-  border-radius:10px;
-  font-size:16px;
-  outline:none;
-}
+    input,
+    textarea {
+      width: 100%;
+      padding: 14px;
+      margin: 7px 0;
+      border-radius: 10px;
+      border: 1px solid #444;
+      background: #050505;
+      color: white;
+      font-size: 16px;
+    }
 
-input:focus,
-textarea:focus{
-  border-color:#fff;
-}
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
 
-textarea{
-  min-height:110px;
-  resize:vertical;
-}
+    button {
+      padding: 13px 18px;
+      margin: 6px 4px 6px 0;
+      border-radius: 10px;
+      border: 1px solid white;
+      background: white;
+      color: black;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+    }
 
-button{
-  border:1px solid #fff;
-  background:#fff;
-  color:#000;
-  padding:13px 20px;
-  border-radius:10px;
-  font-size:16px;
-  font-weight:bold;
-  cursor:pointer;
-  margin:5px;
-}
+    button:hover {
+      background: black;
+      color: white;
+    }
 
-button:hover{
-  background:#000;
-  color:#fff;
-}
+    .danger {
+      background: #000;
+      color: white;
+      border-color: #555;
+    }
 
-.logout{
-  background:#000;
-  color:#fff;
-}
+    .danger:hover {
+      background: white;
+      color: black;
+    }
 
-.logout:hover{
-  background:#fff;
-  color:#000;
-}
+    .hidden {
+      display: none !important;
+    }
 
-.delete{
-  background:#000;
-  color:#fff;
-  border-color:#555;
-}
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
 
-.delete:hover{
-  background:#fff;
-  color:#000;
-}
+    .logo {
+      font-size: 30px;
+      font-weight: bold;
+    }
 
-.hidden{
-  display:none;
-}
+    .muted {
+      color: #999;
+    }
 
-.top{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:15px;
-  flex-wrap:wrap;
-}
+    .message {
+      display: none;
+      padding: 12px;
+      margin-top: 12px;
+      border: 1px solid #555;
+      border-radius: 10px;
+    }
 
-.logo{
-  font-size:30px;
-  font-weight:bold;
-  letter-spacing:1px;
-}
+    .bike {
+      background: #080808;
+      border: 1px solid #333;
+      border-radius: 15px;
+      padding: 15px;
+      margin-top: 15px;
+    }
 
-.subtitle{
-  color:#aaa;
-}
+    .bike img {
+      width: 100%;
+      max-height: 280px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 12px;
+    }
 
-.message{
-  display:none;
-  padding:12px;
-  border:1px solid #555;
-  border-radius:10px;
-  margin-top:12px;
-}
+    .price {
+      font-size: 21px;
+      font-weight: bold;
+      margin: 8px 0;
+    }
 
-.bike{
-  background:#080808;
-  border:1px solid #333;
-  border-radius:15px;
-  padding:15px;
-  margin-top:15px;
-}
+    .empty {
+      text-align: center;
+      color: #888;
+      padding: 25px 10px;
+    }
 
-.bike img{
-  width:100%;
-  max-height:280px;
-  object-fit:cover;
-  border-radius:10px;
-  display:block;
-  margin-bottom:15px;
-}
+    #loginBox {
+      max-width: 500px;
+      margin: 70px auto;
+    }
 
-.price{
-  font-size:21px;
-  font-weight:bold;
-  margin:8px 0;
-}
+    .loginTitle {
+      font-size: 32px;
+      font-weight: bold;
+    }
 
-.small{
-  color:#999;
-  font-size:14px;
-}
-
-hr{
-  border:0;
-  border-top:1px solid #292929;
-  margin:20px 0;
-}
-
-#loginBox{
-  max-width:500px;
-  margin:70px auto;
-}
-
-.login-title{
-  font-size:32px;
-  margin-bottom:8px;
-}
-
-.admin-title{
-  font-size:28px;
-}
-
-.empty{
-  color:#999;
-  text-align:center;
-  padding:25px;
-}
-</style>
+    .adminTitle {
+      font-size: 27px;
+      font-weight: bold;
+    }
+  </style>
 </head>
 
 <body>
 
 <div class="container">
 
-<!-- LOGIN -->
-<div id="loginBox" class="card">
+  <!-- ================= LOGIN ================= -->
 
-  <div class="login-title">
-    🔒 Bike Zone
+  <div id="loginBox" class="card">
+
+    <div class="loginTitle">
+      🔒 Bike Zone
+    </div>
+
+    <p class="muted">
+      Private Admin Login
+    </p>
+
+    <hr>
+
+    <input
+      id="email"
+      type="email"
+      placeholder="Admin Email"
+      autocomplete="email"
+    >
+
+    <input
+      id="password"
+      type="password"
+      placeholder="Password"
+      autocomplete="current-password"
+    >
+
+    <button onclick="login()">
+      LOGIN
+    </button>
+
+    <div id="loginMessage" class="message"></div>
+
   </div>
 
-  <p class="subtitle">
-    Private Admin Login
-  </p>
 
-  <hr>
+  <!-- ================= ADMIN PANEL ================= -->
 
-  <input
-    id="email"
-    type="email"
-    placeholder="Admin Email"
-  >
+  <div id="adminPanel" class="hidden">
 
-  <input
-    id="password"
-    type="password"
-    placeholder="Password"
-  >
+    <!-- HEADER -->
 
-  <button onclick="login()">
-    Login
-  </button>
+    <div class="card">
 
-  <div id="loginMessage" class="message"></div>
+      <div class="top">
 
-</div>
+        <div>
+          <div class="adminTitle">
+            🚲 BIKE ZONE ADMIN
+          </div>
 
-
-<!-- ADMIN PANEL -->
-<div id="adminPanel" class="hidden">
-
-  <div class="card">
-
-    <div class="top">
-
-      <div>
-        <div class="admin-title">
-          BIKE ZONE ADMIN
+          <div
+            id="userEmail"
+            class="muted">
+          </div>
         </div>
 
-        <div
-          id="userEmail"
-          class="small">
-        </div>
+        <button
+          class="danger"
+          onclick="logout()">
+          LOGOUT
+        </button>
+
       </div>
 
-      <button
-        class="logout"
-        onclick="logout()">
-        Logout
-      </button>
-
     </div>
 
-  </div>
 
+    <!-- ADD / EDIT BIKE -->
 
-  <!-- ADD BIKE -->
-  <div class="card">
+    <div class="card">
 
-    <h2 id="formTitle">
-      Add New Bike
-    </h2>
-
-    <input
-      id="bikeName"
-      placeholder="Bike Name"
-    >
-
-    <input
-      id="brand"
-      placeholder="Brand"
-    >
-
-    <input
-      id="model"
-      placeholder="Model"
-    >
-
-    <input
-      id="price"
-      type="number"
-      placeholder="Price"
-    >
-
-    <textarea
-      id="description"
-      placeholder="Bike Description">
-    </textarea>
-
-    <input
-      id="imageUrl"
-      placeholder="Bike Image URL"
-    >
-
-    <br>
-
-    <button onclick="saveBike()">
-      SAVE BIKE
-    </button>
-
-    <button
-      class="logout"
-      onclick="clearForm()">
-      CLEAR
-    </button>
-
-    <div
-      id="message"
-      class="message">
-    </div>
-
-  </div>
-
-
-  <!-- BIKES -->
-  <div class="card">
-
-    <div class="top">
-
-      <h2>
-        Your Bikes
+      <h2 id="formTitle">
+        Add New Bike
       </h2>
 
-      <button
-        class="logout"
-        onclick="loadBikes()">
-        Refresh
+      <input
+        id="bikeName"
+        placeholder="Bike Name"
+      >
+
+      <input
+        id="brand"
+        placeholder="Brand"
+      >
+
+      <input
+        id="model"
+        placeholder="Model"
+      >
+
+      <input
+        id="price"
+        type="number"
+        placeholder="Price"
+      >
+
+      <textarea
+        id="description"
+        placeholder="Bike Description"></textarea>
+
+      <input
+        id="imageUrl"
+        type="url"
+        placeholder="Bike Image URL"
+      >
+
+      <button onclick="saveBike()">
+        SAVE BIKE
       </button>
+
+      <button
+        class="danger"
+        onclick="clearForm()">
+        CLEAR
+      </button>
+
+      <div
+        id="message"
+        class="message">
+      </div>
 
     </div>
 
-    <div id="bikeList">
-      Loading...
+
+    <!-- BIKE LIST -->
+
+    <div class="card">
+
+      <div class="top">
+
+        <h2>
+          Your Bikes
+        </h2>
+
+        <button
+          class="danger"
+          onclick="loadBikes()">
+          REFRESH
+        </button>
+
+      </div>
+
+      <div id="bikeList">
+        Loading...
+      </div>
+
     </div>
 
   </div>
-
-</div>
 
 </div>
 
 
 <script>
 
-/* =========================
-   SUPABASE
-========================= */
+/* =====================================================
+   SUPABASE CONFIG
+   =====================================================
+
+   YAHAN APNI SUPABASE VALUES DALO.
+
+   Example:
+
+   const SUPABASE_URL =
+   "https://xxxxxxxx.supabase.co";
+
+   const SUPABASE_ANON_KEY =
+   "eyJhbGciOiJIUzI1NiIs...";
+
+   IMPORTANT:
+   Service role / secret key yahan MAT dalna.
+===================================================== */
 
 const SUPABASE_URL =
-"YOUR_SUPABASE_URL";
+  "YOUR_SUPABASE_URL";
 
 const SUPABASE_ANON_KEY =
-"YOUR_SUPABASE_ANON_KEY";
+  "YOUR_SUPABASE_ANON_KEY";
 
 
 const supabaseClient =
-supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+  );
 
 
-/* =========================
-   VARIABLES
-========================= */
+/* =====================================================
+   GLOBAL
+===================================================== */
 
 let editingId = null;
 
 
-/* =========================
-   LOGIN
-========================= */
+/* =====================================================
+   HELPER
+===================================================== */
 
-async function login(){
+function $(id) {
+  return document.getElementById(id);
+}
+
+
+/* =====================================================
+   LOGIN
+===================================================== */
+
+async function login() {
 
   const email =
-    document
-      .getElementById("email")
-      .value
-      .trim();
+    $("email").value.trim();
 
   const password =
-    document
-      .getElementById("password")
-      .value;
+    $("password").value;
 
-  if(!email || !password){
+  if (!email || !password) {
 
     showLoginMessage(
       "Email aur password bharo."
@@ -392,19 +388,37 @@ async function login(){
     return;
   }
 
-
-  const {data,error} =
-    await supabaseClient.auth
-      .signInWithPassword({
-        email,
-        password
-      });
+  showLoginMessage(
+    "Login ho raha hai..."
+  );
 
 
-  if(error){
+  const {
+    data,
+    error
+  } =
+    await supabaseClient.auth.signInWithPassword({
+      email: email,
+      password: password
+    });
+
+
+  if (error) {
+
+    console.error(error);
 
     showLoginMessage(
       "Login failed: " + error.message
+    );
+
+    return;
+  }
+
+
+  if (!data || !data.user) {
+
+    showLoginMessage(
+      "User login nahi hua."
     );
 
     return;
@@ -415,20 +429,21 @@ async function login(){
 }
 
 
-/* =========================
+/* =====================================================
    CHECK ADMIN
-========================= */
+===================================================== */
 
-async function checkAdmin(){
+async function checkAdmin() {
 
   const {
-    data:{user}
+    data: {
+      user
+    }
   } =
-    await supabaseClient.auth
-      .getUser();
+    await supabaseClient.auth.getUser();
 
 
-  if(!user){
+  if (!user) {
 
     showLogin();
 
@@ -436,51 +451,76 @@ async function checkAdmin(){
   }
 
 
-  const {data,error} =
+  /*
+    Check admin_users table
+  */
+
+  const {
+    data,
+    error
+  } =
     await supabaseClient
       .from("admin_users")
-      .select("id")
-      .eq("user_id",user.id)
+      .select("user_id")
+      .eq("user_id", user.id)
       .maybeSingle();
 
 
-  if(error || !data){
+  if (error) {
+
+    console.error(
+      "Admin check error:",
+      error
+    );
 
     await supabaseClient.auth.signOut();
 
     showLoginMessage(
-      "Access denied. Admin account required."
+      "Admin table check failed. Supabase setup check karo."
     );
 
     return;
   }
 
 
-  document
-    .getElementById("loginBox")
-    .classList.add("hidden");
+  if (!data) {
+
+    await supabaseClient.auth.signOut();
+
+    showLoginMessage(
+      "Access denied. Ye account admin nahi hai."
+    );
+
+    return;
+  }
 
 
-  document
-    .getElementById("adminPanel")
-    .classList.remove("hidden");
+  /* ADMIN SUCCESS */
+
+  $("loginBox")
+    .classList
+    .add("hidden");
 
 
-  document
-    .getElementById("userEmail")
+  $("adminPanel")
+    .classList
+    .remove("hidden");
+
+
+  $("userEmail")
     .textContent =
-      user.email;
+      user.email || "";
 
 
-  loadBikes();
+  await loadBikes();
 }
 
 
-/* =========================
+/* =====================================================
    LOGOUT
-========================= */
+===================================================== */
 
-async function logout(){
+async function logout() {
 
   await supabaseClient.auth.signOut();
 
@@ -492,60 +532,77 @@ async function logout(){
 }
 
 
-/* =========================
+/* =====================================================
    SHOW LOGIN
-========================= */
+===================================================== */
 
-function showLogin(){
+function showLogin() {
 
-  document
-    .getElementById("loginBox")
-    .classList.remove("hidden");
+  $("loginBox")
+    .classList
+    .remove("hidden");
 
-  document
-    .getElementById("adminPanel")
-    .classList.add("hidden");
+
+  $("adminPanel")
+    .classList
+    .add("hidden");
+
+
+  $("email").value = "";
+
+  $("password").value = "";
 }
 
 
-/* =========================
+/* =====================================================
    LOAD BIKES
-========================= */
+===================================================== */
 
-async function loadBikes(){
+async function loadBikes() {
 
   const list =
-    document.getElementById("bikeList");
+    $("bikeList");
+
 
   list.innerHTML =
-    "Loading...";
+    "<div class='empty'>Loading bikes...</div>";
 
 
-  const {data,error} =
+  const {
+    data,
+    error
+  } =
     await supabaseClient
       .from("bikes")
       .select("*")
       .order(
         "created_at",
-        {ascending:false}
+        {
+          ascending: false
+        }
       );
 
 
-  if(error){
-
-    list.innerHTML =
-      "<div class='empty'>Unable to load bikes.</div>";
+  if (error) {
 
     console.error(error);
+
+    list.innerHTML =
+      "<div class='empty'>" +
+      "Bikes load nahi ho rahi: " +
+      escapeHtml(error.message) +
+      "</div>";
 
     return;
   }
 
 
-  if(!data || data.length === 0){
+  if (!data || data.length === 0) {
 
     list.innerHTML =
-      "<div class='empty'>No bikes added yet.</div>";
+      "<div class='empty'>" +
+      "Abhi koi bike add nahi hai." +
+      "</div>";
 
     return;
   }
@@ -554,7 +611,7 @@ async function loadBikes(){
   list.innerHTML = "";
 
 
-  data.forEach(bike => {
+  data.forEach(function(bike) {
 
     const div =
       document.createElement("div");
@@ -563,62 +620,91 @@ async function loadBikes(){
       "bike";
 
 
-    let image = "";
+    let html = "";
 
-    if(bike.image_url){
 
-      image = `
-        <img
-          src="${escapeHtml(bike.image_url)}"
-          alt="Bike">
-      `;
+    if (bike.image_url) {
+
+      html +=
+        "<img src=\"" +
+        escapeAttribute(
+          bike.image_url
+        ) +
+        "\" alt=\"Bike\">";
     }
 
 
-    div.innerHTML = `
+    html +=
+      "<h3>" +
+      escapeHtml(
+        bike.name || "Bike"
+      ) +
+      "</h3>";
 
-      ${image}
 
-      <h3>
-        ${escapeHtml(
-          bike.name || "Bike"
-        )}
-      </h3>
+    html +=
+      "<div class='muted'>" +
+      escapeHtml(
+        bike.brand || ""
+      );
 
-      <div class="small">
-        ${escapeHtml(
-          bike.brand || ""
-        )}
-        ${bike.model
-          ? " • " +
-            escapeHtml(bike.model)
-          : ""}
-      </div>
 
-      <div class="price">
-        ₹${Number(
-          bike.price || 0
-        ).toLocaleString("en-IN")}
-      </div>
+    if (bike.model) {
 
-      <p>
-        ${escapeHtml(
-          bike.description || ""
-        )}
-      </p>
+      html +=
+        " • " +
+        escapeHtml(
+          bike.model
+        );
+    }
 
-      <button
-        onclick='editBike(${JSON.stringify(bike)})'>
-        EDIT
-      </button>
 
-      <button
-        class="delete"
-        onclick="deleteBike('${bike.id}')">
-        DELETE
-      </button>
+    html +=
+      "</div>";
 
-    `;
+
+    html +=
+      "<div class='price'>" +
+      "₹" +
+      Number(
+        bike.price || 0
+      ).toLocaleString("en-IN") +
+      "</div>";
+
+
+    html +=
+      "<p>" +
+      escapeHtml(
+        bike.description || ""
+      ) +
+      "</p>";
+
+
+    html +=
+      "<button " +
+      "onclick='editBikeById(\"" +
+      escapeAttribute(
+        bike.id
+      ) +
+      "\")'>" +
+      "EDIT" +
+      "</button>";
+
+
+    html +=
+      "<button " +
+      "class='danger' " +
+      "onclick='deleteBike(\"" +
+      escapeAttribute(
+        bike.id
+      ) +
+      "\")'>" +
+      "DELETE" +
+      "</button>";
+
+
+    div.innerHTML =
+      html;
 
 
     list.appendChild(div);
@@ -628,52 +714,128 @@ async function loadBikes(){
 }
 
 
-/* =========================
-   SAVE BIKE
-========================= */
+/* =====================================================
+   GET ONE BIKE FOR EDIT
+===================================================== */
 
-async function saveBike(){
+async function editBikeById(id) {
 
-  const name =
-    document
-      .getElementById("bikeName")
-      .value
-      .trim();
-
-  const brand =
-    document
-      .getElementById("brand")
-      .value
-      .trim();
-
-  const model =
-    document
-      .getElementById("model")
-      .value
-      .trim();
-
-  const price =
-    document
-      .getElementById("price")
-      .value;
-
-  const description =
-    document
-      .getElementById("description")
-      .value
-      .trim();
-
-  const image_url =
-    document
-      .getElementById("imageUrl")
-      .value
-      .trim();
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("bikes")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
 
 
-  if(!name || !price){
+  if (error || !data) {
 
     showMessage(
-      "Bike name aur price required hai."
+      "Bike nahi mili."
+    );
+
+    return;
+  }
+
+
+  editingId =
+    data.id;
+
+
+  $("formTitle")
+    .textContent =
+      "Edit Bike";
+
+
+  $("bikeName").value =
+    data.name || "";
+
+
+  $("brand").value =
+    data.brand || "";
+
+
+  $("model").value =
+    data.model || "";
+
+
+  $("price").value =
+    data.price || "";
+
+
+  $("description").value =
+    data.description || "";
+
+
+  $("imageUrl").value =
+    data.image_url || "";
+
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
+
+
+/* =====================================================
+   SAVE BIKE
+===================================================== */
+
+async function saveBike() {
+
+  const name =
+    $("bikeName")
+      .value
+      .trim();
+
+
+  const brand =
+    $("brand")
+      .value
+      .trim();
+
+
+  const model =
+    $("model")
+      .value
+      .trim();
+
+
+  const price =
+    $("price")
+      .value;
+
+
+  const description =
+    $("description")
+      .value
+      .trim();
+
+
+  const image_url =
+    $("imageUrl")
+      .value
+      .trim();
+
+
+  if (!name) {
+
+    showMessage(
+      "Bike name required hai."
+    );
+
+    return;
+  }
+
+
+  if (!price) {
+
+    showMessage(
+      "Price required hai."
     );
 
     return;
@@ -682,17 +844,17 @@ async function saveBike(){
 
   const bikeData = {
 
-    name:name,
+    name: name,
 
-    brand:brand,
+    brand: brand,
 
-    model:model,
+    model: model,
 
-    price:Number(price),
+    price: Number(price),
 
-    description:description,
+    description: description,
 
-    image_url:image_url
+    image_url: image_url
 
   };
 
@@ -700,15 +862,21 @@ async function saveBike(){
   let result;
 
 
-  if(editingId){
+  /* EDIT */
+
+  if (editingId) {
 
     result =
       await supabaseClient
         .from("bikes")
         .update(bikeData)
-        .eq("id",editingId);
+        .eq("id", editingId);
 
-  }else{
+  }
+
+  /* ADD */
+
+  else {
 
     result =
       await supabaseClient
@@ -718,9 +886,11 @@ async function saveBike(){
   }
 
 
-  if(result.error){
+  if (result.error) {
 
-    console.error(result.error);
+    console.error(
+      result.error
+    );
 
     showMessage(
       result.error.message
@@ -732,99 +902,47 @@ async function saveBike(){
 
   showMessage(
     editingId
-      ? "Bike updated successfully."
-      : "Bike added successfully."
+      ? "Bike successfully updated."
+      : "Bike successfully added."
   );
 
 
   clearForm();
 
-  loadBikes();
+  await loadBikes();
 }
 
 
-/* =========================
-   EDIT BIKE
-========================= */
+/* =====================================================
+   DELETE BIKE
+===================================================== */
 
-function editBike(bike){
+async function deleteBike(id) {
 
-  editingId =
-    bike.id;
-
-
-  document
-    .getElementById("formTitle")
-    .textContent =
-      "Edit Bike";
-
-
-  document
-    .getElementById("bikeName")
-    .value =
-      bike.name || "";
-
-
-  document
-    .getElementById("brand")
-    .value =
-      bike.brand || "";
-
-
-  document
-    .getElementById("model")
-    .value =
-      bike.model || "";
-
-
-  document
-    .getElementById("price")
-    .value =
-      bike.price || "";
-
-
-  document
-    .getElementById("description")
-    .value =
-      bike.description || "";
-
-
-  document
-    .getElementById("imageUrl")
-    .value =
-      bike.image_url || "";
-
-
-  window.scrollTo({
-    top:0,
-    behavior:"smooth"
-  });
-}
-
-
-/* =========================
-   DELETE
-========================= */
-
-async function deleteBike(id){
-
-  const ok =
-    confirm(
-      "Delete this bike?"
+  const confirmDelete =
+    window.confirm(
+      "Kya tum ye bike delete karna chahte ho?"
     );
 
 
-  if(!ok) return;
+  if (!confirmDelete) {
+
+    return;
+  }
 
 
-  const {error} =
+  const {
+    error
+  } =
     await supabaseClient
       .from("bikes")
       .delete()
-      .eq("id",id);
+      .eq("id", id);
 
 
-  if(error){
+  if (error) {
+
+    console.error(error);
 
     showMessage(
       error.message
@@ -835,103 +953,92 @@ async function deleteBike(id){
 
 
   showMessage(
-    "Bike deleted."
+    "Bike delete ho gayi."
   );
 
 
-  loadBikes();
+  await loadBikes();
 }
 
 
-/* =========================
-   CLEAR
-========================= */
+/* =====================================================
+   CLEAR FORM
+===================================================== */
 
-function clearForm(){
+function clearForm() {
 
   editingId = null;
 
 
-  document
-    .getElementById("formTitle")
+  $("formTitle")
     .textContent =
       "Add New Bike";
 
 
-  document
-    .getElementById("bikeName")
-    .value = "";
+  $("bikeName").value = "";
 
+  $("brand").value = "";
 
-  document
-    .getElementById("brand")
-    .value = "";
+  $("model").value = "";
 
+  $("price").value = "";
 
-  document
-    .getElementById("model")
-    .value = "";
+  $("description").value = "";
 
-
-  document
-    .getElementById("price")
-    .value = "";
-
-
-  document
-    .getElementById("description")
-    .value = "";
-
-
-  document
-    .getElementById("imageUrl")
-    .value = "";
+  $("imageUrl").value = "";
 }
 
 
-/* =========================
-   MESSAGES
-========================= */
+/* =====================================================
+   MESSAGE
+===================================================== */
 
-function showMessage(text){
+function showMessage(text) {
 
   const box =
-    document.getElementById("message");
+    $("message");
+
 
   box.textContent =
     text;
+
 
   box.style.display =
     "block";
 
 
-  setTimeout(()=>{
-    box.style.display =
-      "none";
-  },4000);
+  setTimeout(
+    function() {
+
+      box.style.display =
+        "none";
+
+    },
+    4000
+  );
 }
 
 
-function showLoginMessage(text){
+function showLoginMessage(text) {
 
   const box =
-    document.getElementById(
-      "loginMessage"
-    );
+    $("loginMessage");
+
 
   box.textContent =
     text;
+
 
   box.style.display =
     "block";
 }
 
 
-/* =========================
-   SECURITY DISPLAY
-========================= */
+/* =====================================================
+   SECURITY HELPERS
+===================================================== */
 
-function escapeHtml(value){
+function escapeHtml(value) {
 
   return String(value)
 
@@ -951,38 +1058,8 @@ function escapeHtml(value){
     )
 
     .replaceAll(
-      '"',
+      "\"",
       "&quot;"
     )
 
-    .replaceAll(
-      "'",
-      "&#039;"
-    );
-}
-
-
-/* =========================
-   SESSION CHECK
-========================= */
-
-supabaseClient.auth
-.onAuthStateChange(
-  async (event,session)=>{
-
-    if(session){
-
-      await checkAdmin();
-
-    }
-
-  }
-);
-
-
-checkAdmin();
-
-</script>
-
-</body>
-</html>list.innerHTML
+    .replaceAll
