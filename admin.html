@@ -3,141 +3,100 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-
   <title>Bike Zone Admin</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    body{
-      margin:0;
-      background:#090909;
-      color:#fff;
-      font-family:Arial,sans-serif;
-    }
-
-    .box{
-      max-width:760px;
-      margin:30px auto;
-      padding:20px;
-    }
-
-    .panel{
-      background:#151515;
-      border:1px solid #292929;
-      border-radius:16px;
-      padding:20px;
-      margin-bottom:18px;
-    }
-
-    input{
-      width:100%;
-      box-sizing:border-box;
-      padding:12px;
-      margin:6px 0;
-      background:#0d0d0d;
-      color:#fff;
-      border:1px solid #333;
-      border-radius:9px;
-    }
-
-    button{
-      padding:12px 17px;
-      border:0;
-      border-radius:9px;
-      background:#ff6b00;
-      color:#fff;
-      font-weight:700;
-      margin:6px 4px 0 0;
-    }
-
-    .logout{
-      background:#444;
-    }
-
-    .muted{
-      color:#999;
-    }
-
-    #adminPanel{
-      display:none;
-    }
-
-    #message{
-      margin-top:12px;
-      color:#ffb000;
-    }
+    *{box-sizing:border-box}
+    body{margin:0;background:#090909;color:#fff;font-family:Arial,sans-serif}
+    .wrap{max-width:850px;margin:auto;padding:25px 18px 60px}
+    .panel{background:#151515;border:1px solid #292929;border-radius:18px;padding:22px;margin-bottom:20px}
+    h1{margin-top:0}
+    input{width:100%;padding:13px;margin:7px 0;background:#0d0d0d;color:#fff;border:1px solid #383838;border-radius:10px;font-size:16px}
+    button{padding:12px 17px;margin:6px 5px 6px 0;border:0;border-radius:10px;background:#ff6b00;color:#fff;font-weight:bold;font-size:15px}
+    button.secondary{background:#444}
+    button.danger{background:#b82020}
+    button.edit{background:#555}
+    .hidden{display:none}
+    .muted{color:#999}
+    .status{padding:12px;background:#202020;border-radius:10px;margin-top:12px}
+    .bike{background:#101010;border:1px solid #292929;border-radius:14px;padding:15px;margin-top:14px}
+    .bike img{width:100%;max-height:250px;object-fit:cover;border-radius:10px}
+    .price{font-size:22px;font-weight:bold;color:#ff913d;margin:8px 0}
+    .tag{display:inline-block;background:#292929;padding:7px 9px;border-radius:8px;margin:3px}
+    #preview{width:100%;max-height:250px;object-fit:cover;border-radius:10px;margin-top:10px}
   </style>
 </head>
 
 <body>
 
-<div class="box">
+<div class="wrap">
 
   <!-- LOGIN -->
   <div class="panel" id="loginPanel">
     <h1>🔐 Bike Zone Admin</h1>
 
-    <p class="muted">
-      Admin login
-    </p>
+    <p class="muted">Admin login</p>
 
-    <input
-      type="email"
-      id="email"
-      placeholder="Admin email"
-    >
+    <input id="email" type="email" placeholder="Admin email">
+    <input id="password" type="password" placeholder="Password">
 
-    <input
-      type="password"
-      id="password"
-      placeholder="Password"
-    >
+    <button id="loginBtn">Login</button>
 
-    <button onclick="login()">
-      Login
-    </button>
-
-    <div id="message"></div>
+    <div id="loginMessage" class="status"></div>
   </div>
 
 
   <!-- ADMIN -->
-  <div class="panel" id="adminPanel">
+  <div class="panel hidden" id="adminPanel">
 
     <h1>🚲 Bike Zone Admin</h1>
 
-    <p>
-      Welcome, Admin!
-    </p>
+    <p>Welcome, Admin!</p>
 
-    <button class="logout" onclick="logout()">
-      Logout
-    </button>
+    <button id="addBtn">➕ Add Bike</button>
+    <button id="refreshBtn" class="secondary">🔄 Refresh</button>
+    <button id="logoutBtn" class="secondary">🚪 Logout</button>
 
-    <hr>
+    <div id="status" class="status">
+      Admin panel ready.
+    </div>
 
-    <h2>Admin Features</h2>
+  </div>
 
-    <p>
-      ➕ Add bike
-    </p>
 
-    <p>
-      📸 Upload photo
-    </p>
+  <!-- ADD / EDIT -->
+  <div class="panel hidden" id="formPanel">
 
-    <p>
-      ✏️ Edit bike details
-    </p>
+    <h2 id="formTitle">➕ Add Bike</h2>
 
-    <p>
-      🗑️ Delete bike
-    </p>
+    <input id="name" placeholder="Bike Name">
+    <input id="model" placeholder="Model">
+    <input id="price" type="number" placeholder="Price">
+    <input id="year" type="number" placeholder="Year">
+    <input id="km" type="number" placeholder="KM Driven">
 
-    <p>
-      🎨 Change logo
-    </p>
+    <p class="muted">Bike Photo</p>
+
+    <input id="photo" type="file" accept="image/*">
+
+    <img id="preview" class="hidden">
+
+    <button id="saveBtn">💾 Save Bike</button>
+    <button id="cancelBtn" class="secondary">Cancel</button>
+
+  </div>
+
+
+  <!-- BIKES -->
+  <div class="panel hidden" id="listPanel">
+
+    <h2>🏍️ Available Bikes</h2>
+
+    <div id="bikeList">
+      Loading...
+    </div>
 
   </div>
 
@@ -146,108 +105,537 @@
 
 <script>
 
-  // SUPABASE CONNECTION
-  const SUPABASE_URL =
-    "https://jwvuyvqejoweyyhexonh.supabase.co";
+const SUPABASE_URL =
+"https://jwvuyvqejoweyyhexonh.supabase.co";
 
-  const SUPABASE_PUBLISHABLE_KEY =
-    "sb_publishable_9xr4-mJuetYNknBqMVvcYA_7OzE6CDm";
+const SUPABASE_KEY =
+"sb_publishable_9xr4-mJuetYNknBqMVvcYA_7OzE6CDm";
 
-  const supabaseClient =
-    window.supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_PUBLISHABLE_KEY
+const db =
+window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+let editingId = null;
+
+
+// ELEMENTS
+const loginPanel =
+document.getElementById("loginPanel");
+
+const adminPanel =
+document.getElementById("adminPanel");
+
+const formPanel =
+document.getElementById("formPanel");
+
+const listPanel =
+document.getElementById("listPanel");
+
+const loginMessage =
+document.getElementById("loginMessage");
+
+const statusBox =
+document.getElementById("status");
+
+
+// LOGIN
+document.getElementById("loginBtn")
+.addEventListener("click", async function(){
+
+  const email =
+    document.getElementById("email").value.trim();
+
+  const password =
+    document.getElementById("password").value;
+
+  if(!email || !password){
+    loginMessage.textContent =
+      "Email aur password bharo.";
+    return;
+  }
+
+  loginMessage.textContent =
+    "Login ho raha hai...";
+
+  const {error} =
+    await db.auth.signInWithPassword({
+      email:email,
+      password:password
+    });
+
+  if(error){
+
+    loginMessage.textContent =
+      "Login failed: " + error.message;
+
+    return;
+  }
+
+  showAdmin();
+
+});
+
+
+// SHOW ADMIN
+function showAdmin(){
+
+  loginPanel.classList.add("hidden");
+
+  adminPanel.classList.remove("hidden");
+
+  listPanel.classList.remove("hidden");
+
+  loadBikes();
+
+}
+
+
+// LOGOUT
+document.getElementById("logoutBtn")
+.addEventListener("click", async function(){
+
+  await db.auth.signOut();
+
+  location.reload();
+
+});
+
+
+// ADD BUTTON
+document.getElementById("addBtn")
+.addEventListener("click", function(){
+
+  editingId = null;
+
+  clearForm();
+
+  document.getElementById("formTitle").textContent =
+    "➕ Add Bike";
+
+  formPanel.classList.remove("hidden");
+
+  window.scrollTo({
+    top:formPanel.offsetTop,
+    behavior:"smooth"
+  });
+
+});
+
+
+// CANCEL
+document.getElementById("cancelBtn")
+.addEventListener("click", function(){
+
+  formPanel.classList.add("hidden");
+
+  clearForm();
+
+});
+
+
+// PHOTO PREVIEW
+document.getElementById("photo")
+.addEventListener("change", function(){
+
+  const file = this.files[0];
+
+  const preview =
+    document.getElementById("preview");
+
+  if(!file){
+
+    preview.classList.add("hidden");
+
+    return;
+  }
+
+  preview.src =
+    URL.createObjectURL(file);
+
+  preview.classList.remove("hidden");
+
+});
+
+
+// SAVE
+document.getElementById("saveBtn")
+.addEventListener("click", async function(){
+
+  const name =
+    document.getElementById("name").value.trim();
+
+  const model =
+    document.getElementById("model").value.trim();
+
+  const price =
+    document.getElementById("price").value;
+
+  const year =
+    document.getElementById("year").value;
+
+  const km =
+    document.getElementById("km").value;
+
+
+  if(!name){
+
+    alert("Bike Name bharo.");
+
+    return;
+  }
+
+
+  const bikeData = {
+
+    name:name,
+
+    model:model || null,
+
+    price:price
+      ? Number(price)
+      : null,
+
+    year:year
+      ? Number(year)
+      : null,
+
+    km:km
+      ? Number(km)
+      : null
+
+  };
+
+
+  const saveBtn =
+    document.getElementById("saveBtn");
+
+  saveBtn.disabled = true;
+
+  saveBtn.textContent =
+    "Saving...";
+
+
+  try{
+
+    // EDIT
+    if(editingId){
+
+      const {error} =
+        await db
+          .from("bikes")
+          .update(bikeData)
+          .eq("id", editingId);
+
+      if(error) throw error;
+
+      statusBox.textContent =
+        "✅ Bike updated successfully.";
+
+    }
+
+    // ADD
+    else{
+
+      const {error} =
+        await db
+          .from("bikes")
+          .insert([bikeData]);
+
+      if(error) throw error;
+
+      statusBox.textContent =
+        "✅ Bike added successfully.";
+
+    }
+
+
+    clearForm();
+
+    formPanel.classList.add("hidden");
+
+    editingId = null;
+
+    await loadBikes();
+
+  }
+
+  catch(error){
+
+    console.error(error);
+
+    alert(
+      "Save error: " +
+      error.message
     );
 
+  }
 
-  // LOGIN
-  async function login(){
+  finally{
 
-    const email =
-      document.getElementById("email").value.trim();
+    saveBtn.disabled = false;
 
-    const password =
-      document.getElementById("password").value;
+    saveBtn.textContent =
+      "💾 Save Bike";
 
-    const message =
-      document.getElementById("message");
+  }
 
-    if(!email || !password){
-      message.textContent =
-        "Email aur password dono bharo.";
-      return;
-    }
+});
 
-    message.textContent =
-      "Login ho raha hai...";
 
-    const { data, error } =
-      await supabaseClient.auth.signInWithPassword({
-        email: email,
-        password: password
-      });
+// LOAD BIKES
+async function loadBikes(){
 
-    if(error){
+  const list =
+    document.getElementById("bikeList");
 
-      message.textContent =
-        "Login failed: " + error.message;
+  list.innerHTML =
+    "Loading...";
 
-      return;
-    }
 
-    message.textContent =
-      "Login successful!";
+  const {data,error} =
+    await db
+      .from("bikes")
+      .select("*")
+      .order("id",{ascending:false});
+
+
+  if(error){
+
+    list.innerHTML =
+      "<p>❌ " + error.message + "</p>";
+
+    return;
+  }
+
+
+  if(!data || data.length === 0){
+
+    list.innerHTML =
+      '<p class="muted">Abhi koi bike available nahi hai.</p>';
+
+    return;
+  }
+
+
+  list.innerHTML = "";
+
+
+  data.forEach(function(bike){
+
+    const div =
+      document.createElement("div");
+
+    div.className =
+      "bike";
+
+
+    const name =
+      bike.name ||
+      bike.model ||
+      bike.title ||
+      "Bike";
+
+
+    div.innerHTML = `
+
+      ${
+        bike.image_url
+        ? `<img src="${bike.image_url}" alt="${name}">`
+        : ""
+      }
+
+      <h3>${name}</h3>
+
+      ${
+        bike.price
+        ? `<div class="price">₹${bike.price}</div>`
+        : ""
+      }
+
+      ${
+        bike.model
+        ? `<span class="tag">Model: ${bike.model}</span>`
+        : ""
+      }
+
+      ${
+        bike.year
+        ? `<span class="tag">Year: ${bike.year}</span>`
+        : ""
+      }
+
+      ${
+        bike.km
+        ? `<span class="tag">KM: ${bike.km}</span>`
+        : ""
+      }
+
+      <br>
+
+      <button
+        class="edit"
+        onclick="editBike('${bike.id}')">
+        ✏️ Edit
+      </button>
+
+      <button
+        class="danger"
+        onclick="deleteBike('${bike.id}')">
+        🗑️ Delete
+      </button>
+
+    `;
+
+
+    list.appendChild(div);
+
+  });
+
+}
+
+
+// EDIT
+async function editBike(id){
+
+  const {data,error} =
+    await db
+      .from("bikes")
+      .select("*")
+      .eq("id",id)
+      .single();
+
+
+  if(error){
+
+    alert(
+      "Bike load error: " +
+      error.message
+    );
+
+    return;
+  }
+
+
+  editingId = id;
+
+
+  document.getElementById("name").value =
+    data.name || "";
+
+  document.getElementById("model").value =
+    data.model || "";
+
+  document.getElementById("price").value =
+    data.price || "";
+
+  document.getElementById("year").value =
+    data.year || "";
+
+  document.getElementById("km").value =
+    data.km || "";
+
+
+  document.getElementById("formTitle").textContent =
+    "✏️ Edit Bike";
+
+
+  formPanel.classList.remove("hidden");
+
+
+  window.scrollTo({
+    top:formPanel.offsetTop,
+    behavior:"smooth"
+  });
+
+}
+
+
+// DELETE
+async function deleteBike(id){
+
+  const ok =
+    confirm(
+      "Kya aap ye bike delete karna chahte ho?"
+    );
+
+  if(!ok) return;
+
+
+  const {error} =
+    await db
+      .from("bikes")
+      .delete()
+      .eq("id",id);
+
+
+  if(error){
+
+    alert(
+      "Delete error: " +
+      error.message
+    );
+
+    return;
+  }
+
+
+  statusBox.textContent =
+    "🗑️ Bike deleted successfully.";
+
+  loadBikes();
+
+}
+
+
+// CLEAR FORM
+function clearForm(){
+
+  document.getElementById("name").value = "";
+
+  document.getElementById("model").value = "";
+
+  document.getElementById("price").value = "";
+
+  document.getElementById("year").value = "";
+
+  document.getElementById("km").value = "";
+
+  document.getElementById("photo").value = "";
+
+  document.getElementById("preview").src = "";
+
+  document.getElementById("preview")
+    .classList.add("hidden");
+
+}
+
+
+// REFRESH
+document.getElementById("refreshBtn")
+.addEventListener("click", function(){
+
+  loadBikes();
+
+});
+
+
+// CHECK SESSION
+async function checkSession(){
+
+  const {data} =
+    await db.auth.getSession();
+
+  if(data.session){
 
     showAdmin();
 
   }
 
+}
 
-  // SHOW ADMIN
-  function showAdmin(){
-
-    document.getElementById("loginPanel")
-      .style.display = "none";
-
-    document.getElementById("adminPanel")
-      .style.display = "block";
-
-  }
-
-
-  // LOGOUT
-  async function logout(){
-
-    await supabaseClient.auth.signOut();
-
-    document.getElementById("adminPanel")
-      .style.display = "none";
-
-    document.getElementById("loginPanel")
-      .style.display = "block";
-
-    document.getElementById("message")
-      .textContent = "";
-
-  }
-
-
-  // CHECK EXISTING LOGIN
-  async function checkLogin(){
-
-    const { data } =
-      await supabaseClient.auth.getSession();
-
-    if(data.session){
-
-      showAdmin();
-
-    }
-
-  }
-
-
-  checkLogin();
+checkSession();
 
 </script>
 
