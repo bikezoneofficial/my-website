@@ -1,165 +1,332 @@
-<!doctype html>
-<html lang="hi">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Bike Zone Admin</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<title>Bike Zone Admin</title>
 
-  <style>
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      background:#090909;
-      color:#fff;
-      font-family:Arial,sans-serif
-    }
-    .wrap{
-      max-width:850px;
-      margin:auto;
-      padding:25px 18px 60px
-    }
-    .panel{
-      background:#151515;
-      border:1px solid #292929;
-      border-radius:18px;
-      padding:22px;
-      margin-bottom:20px
-    }
-    h1{margin-top:0}
-    input{
-      width:100%;
-      padding:13px;
-      margin:7px 0;
-      background:#0d0d0d;
-      color:#fff;
-      border:1px solid #383838;
-      border-radius:10px;
-      font-size:16px
-    }
-    button{
-      padding:12px 17px;
-      margin:6px 5px 6px 0;
-      border:0;
-      border-radius:10px;
-      background:#ff6b00;
-      color:#fff;
-      font-weight:bold;
-      font-size:15px
-    }
-    button.secondary{background:#444}
-    button.danger{background:#b82020}
-    button.edit{background:#555}
-    button:disabled{opacity:.6}
-    .hidden{display:none}
-    .muted{color:#999}
-    .status{
-      padding:12px;
-      background:#202020;
-      border-radius:10px;
-      margin-top:12px
-    }
-    .bike{
-      background:#101010;
-      border:1px solid #292929;
-      border-radius:14px;
-      padding:15px;
-      margin-top:14px
-    }
-    .bike img{
-      width:100%;
-      max-height:250px;
-      object-fit:cover;
-      border-radius:10px
-    }
-    .price{
-      font-size:22px;
-      font-weight:bold;
-      color:#ff913d;
-      margin:8px 0
-    }
-    .tag{
-      display:inline-block;
-      background:#292929;
-      padding:7px 9px;
-      border-radius:8px;
-      margin:3px
-    }
-    #preview{
-      width:100%;
-      max-height:250px;
-      object-fit:cover;
-      border-radius:10px;
-      margin-top:10px
-    }
-  </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  background:#000;
+  color:#fff;
+  font-family:Arial,Helvetica,sans-serif;
+}
+
+.container{
+  width:100%;
+  max-width:900px;
+  margin:auto;
+  padding:25px 16px 60px;
+}
+
+.card{
+  background:#111;
+  border:1px solid #333;
+  border-radius:18px;
+  padding:25px;
+  margin-bottom:20px;
+}
+
+h1,h2,h3{
+  margin-top:0;
+}
+
+input,
+textarea{
+  width:100%;
+  padding:15px;
+  margin:7px 0;
+  background:#000;
+  color:#fff;
+  border:1px solid #444;
+  border-radius:10px;
+  font-size:16px;
+  outline:none;
+}
+
+input:focus,
+textarea:focus{
+  border-color:#fff;
+}
+
+textarea{
+  min-height:110px;
+  resize:vertical;
+}
+
+button{
+  border:1px solid #fff;
+  background:#fff;
+  color:#000;
+  padding:13px 20px;
+  border-radius:10px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+  margin:5px;
+}
+
+button:hover{
+  background:#000;
+  color:#fff;
+}
+
+.logout{
+  background:#000;
+  color:#fff;
+}
+
+.logout:hover{
+  background:#fff;
+  color:#000;
+}
+
+.delete{
+  background:#000;
+  color:#fff;
+  border-color:#555;
+}
+
+.delete:hover{
+  background:#fff;
+  color:#000;
+}
+
+.hidden{
+  display:none;
+}
+
+.top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  flex-wrap:wrap;
+}
+
+.logo{
+  font-size:30px;
+  font-weight:bold;
+  letter-spacing:1px;
+}
+
+.subtitle{
+  color:#aaa;
+}
+
+.message{
+  display:none;
+  padding:12px;
+  border:1px solid #555;
+  border-radius:10px;
+  margin-top:12px;
+}
+
+.bike{
+  background:#080808;
+  border:1px solid #333;
+  border-radius:15px;
+  padding:15px;
+  margin-top:15px;
+}
+
+.bike img{
+  width:100%;
+  max-height:280px;
+  object-fit:cover;
+  border-radius:10px;
+  display:block;
+  margin-bottom:15px;
+}
+
+.price{
+  font-size:21px;
+  font-weight:bold;
+  margin:8px 0;
+}
+
+.small{
+  color:#999;
+  font-size:14px;
+}
+
+hr{
+  border:0;
+  border-top:1px solid #292929;
+  margin:20px 0;
+}
+
+#loginBox{
+  max-width:500px;
+  margin:70px auto;
+}
+
+.login-title{
+  font-size:32px;
+  margin-bottom:8px;
+}
+
+.admin-title{
+  font-size:28px;
+}
+
+.empty{
+  color:#999;
+  text-align:center;
+  padding:25px;
+}
+</style>
 </head>
 
 <body>
 
-<div class="wrap">
+<div class="container">
 
-  <!-- LOGIN -->
-  <div class="panel" id="loginPanel">
-    <h1>🔐 Bike Zone Admin</h1>
+<!-- LOGIN -->
+<div id="loginBox" class="card">
 
-    <p class="muted">Admin login</p>
-
-    <input id="email" type="email" placeholder="Admin email">
-    <input id="password" type="password" placeholder="Password">
-
-    <button id="loginBtn">Login</button>
-
-    <div id="loginMessage" class="status"></div>
+  <div class="login-title">
+    🔒 Bike Zone
   </div>
 
+  <p class="subtitle">
+    Private Admin Login
+  </p>
 
-  <!-- ADMIN -->
-  <div class="panel hidden" id="adminPanel">
+  <hr>
 
-    <h1>🚲 Bike Zone Admin</h1>
+  <input
+    id="email"
+    type="email"
+    placeholder="Admin Email"
+  >
 
-    <p>Welcome, Admin!</p>
+  <input
+    id="password"
+    type="password"
+    placeholder="Password"
+  >
 
-    <button id="addBtn">➕ Add Bike</button>
-    <button id="refreshBtn" class="secondary">🔄 Refresh</button>
-    <button id="logoutBtn" class="secondary">🚪 Logout</button>
+  <button onclick="login()">
+    Login
+  </button>
 
-    <div id="status" class="status">
-      Admin panel ready.
+  <div id="loginMessage" class="message"></div>
+
+</div>
+
+
+<!-- ADMIN PANEL -->
+<div id="adminPanel" class="hidden">
+
+  <div class="card">
+
+    <div class="top">
+
+      <div>
+        <div class="admin-title">
+          BIKE ZONE ADMIN
+        </div>
+
+        <div
+          id="userEmail"
+          class="small">
+        </div>
+      </div>
+
+      <button
+        class="logout"
+        onclick="logout()">
+        Logout
+      </button>
+
     </div>
 
   </div>
 
 
-  <!-- ADD / EDIT -->
-  <div class="panel hidden" id="formPanel">
+  <!-- ADD BIKE -->
+  <div class="card">
 
-    <h2 id="formTitle">➕ Add Bike</h2>
+    <h2 id="formTitle">
+      Add New Bike
+    </h2>
 
-    <input id="name" placeholder="Bike Name">
-    <input id="model" placeholder="Model">
-    <input id="price" type="number" placeholder="Price">
-    <input id="year" type="number" placeholder="Year">
-    <input id="km" type="number" placeholder="KM Driven">
+    <input
+      id="bikeName"
+      placeholder="Bike Name"
+    >
 
-    <p class="muted">Bike Photo</p>
+    <input
+      id="brand"
+      placeholder="Brand"
+    >
 
-    <input id="photo" type="file" accept="image/*">
+    <input
+      id="model"
+      placeholder="Model"
+    >
 
-    <img id="preview" class="hidden">
+    <input
+      id="price"
+      type="number"
+      placeholder="Price"
+    >
 
-    <button id="saveBtn">💾 Save Bike</button>
-    <button id="cancelBtn" class="secondary">Cancel</button>
+    <textarea
+      id="description"
+      placeholder="Bike Description">
+    </textarea>
+
+    <input
+      id="imageUrl"
+      placeholder="Bike Image URL"
+    >
+
+    <br>
+
+    <button onclick="saveBike()">
+      SAVE BIKE
+    </button>
+
+    <button
+      class="logout"
+      onclick="clearForm()">
+      CLEAR
+    </button>
+
+    <div
+      id="message"
+      class="message">
+    </div>
 
   </div>
 
 
   <!-- BIKES -->
-  <div class="panel hidden" id="listPanel">
+  <div class="card">
 
-    <h2>🏍️ Available Bikes</h2>
+    <div class="top">
+
+      <h2>
+        Your Bikes
+      </h2>
+
+      <button
+        class="logout"
+        onclick="loadBikes()">
+        Refresh
+      </button>
+
+    </div>
 
     <div id="bikeList">
       Loading...
@@ -169,380 +336,207 @@
 
 </div>
 
+</div>
+
 
 <script>
 
+/* =========================
+   SUPABASE
+========================= */
+
 const SUPABASE_URL =
-"https://jwvuyvqejoweyyhexonh.supabase.co";
+"YOUR_SUPABASE_URL";
 
-const SUPABASE_KEY =
-"sb_publishable_9xr4-mJuetYNknBqMVvcYA_7OzE6CDm";
+const SUPABASE_ANON_KEY =
+"YOUR_SUPABASE_ANON_KEY";
 
-const db =
-window.supabase.createClient(
+
+const supabaseClient =
+supabase.createClient(
   SUPABASE_URL,
-  SUPABASE_KEY
+  SUPABASE_ANON_KEY
 );
 
+
+/* =========================
+   VARIABLES
+========================= */
+
 let editingId = null;
-let currentImageUrl = "";
 
 
-// ELEMENTS
-const loginPanel =
-document.getElementById("loginPanel");
+/* =========================
+   LOGIN
+========================= */
 
-const adminPanel =
-document.getElementById("adminPanel");
-
-const formPanel =
-document.getElementById("formPanel");
-
-const listPanel =
-document.getElementById("listPanel");
-
-const loginMessage =
-document.getElementById("loginMessage");
-
-const statusBox =
-document.getElementById("status");
-
-
-// LOGIN
-document.getElementById("loginBtn")
-.addEventListener("click", async function(){
+async function login(){
 
   const email =
-  document.getElementById("email").value.trim();
+    document
+      .getElementById("email")
+      .value
+      .trim();
 
   const password =
-  document.getElementById("password").value;
+    document
+      .getElementById("password")
+      .value;
 
   if(!email || !password){
 
-    loginMessage.textContent =
-    "Email aur password bharo.";
-
-    return;
-  }
-
-  loginMessage.textContent =
-  "Login ho raha hai...";
-
-  const {error} =
-  await db.auth.signInWithPassword({
-    email:email,
-    password:password
-  });
-
-  if(error){
-
-    loginMessage.textContent =
-    "Login failed: " + error.message;
-
-    return;
-  }
-
-  loginMessage.textContent =
-  "Login successful!";
-
-  showAdmin();
-
-});
-
-
-// SHOW ADMIN
-function showAdmin(){
-
-  loginPanel.classList.add("hidden");
-
-  adminPanel.classList.remove("hidden");
-
-  listPanel.classList.remove("hidden");
-
-  loadBikes();
-
-}
-
-
-// LOGOUT
-document.getElementById("logoutBtn")
-.addEventListener("click", async function(){
-
-  await db.auth.signOut();
-
-  location.reload();
-
-});
-
-
-// ADD BUTTON
-document.getElementById("addBtn")
-.addEventListener("click", function(){
-
-  editingId = null;
-
-  currentImageUrl = "";
-
-  clearForm();
-
-  document.getElementById("formTitle").textContent =
-  "➕ Add Bike";
-
-  formPanel.classList.remove("hidden");
-
-  window.scrollTo({
-    top:formPanel.offsetTop,
-    behavior:"smooth"
-  });
-
-});
-
-
-// CANCEL
-document.getElementById("cancelBtn")
-.addEventListener("click", function(){
-
-  formPanel.classList.add("hidden");
-
-  clearForm();
-
-});
-
-
-// PHOTO PREVIEW
-document.getElementById("photo")
-.addEventListener("change", function(){
-
-  const file = this.files[0];
-
-  const preview =
-  document.getElementById("preview");
-
-  if(!file){
-
-    return;
-  }
-
-  preview.src =
-  URL.createObjectURL(file);
-
-  preview.classList.remove("hidden");
-
-});
-
-
-// UPLOAD PHOTO
-async function uploadPhoto(file){
-
-  if(!file){
-    return currentImageUrl || null;
-  }
-
-  const extension =
-  file.name.split(".").pop().toLowerCase();
-
-  const fileName =
-  "bike-" +
-  Date.now() +
-  "-" +
-  Math.random().toString(36).substring(2) +
-  "." +
-  extension;
-
-  const filePath =
-  fileName;
-
-  const {error} =
-  await db.storage
-    .from("bike-images")
-    .upload(filePath, file, {
-      cacheControl:"3600",
-      upsert:false
-    });
-
-  if(error){
-    throw error;
-  }
-
-  const {data} =
-  db.storage
-    .from("bike-images")
-    .getPublicUrl(filePath);
-
-  return data.publicUrl;
-}
-
-
-// SAVE
-document.getElementById("saveBtn")
-.addEventListener("click", async function(){
-
-  const name =
-  document.getElementById("name").value.trim();
-
-  const model =
-  document.getElementById("model").value.trim();
-
-  const price =
-  document.getElementById("price").value;
-
-  const year =
-  document.getElementById("year").value;
-
-  const km =
-  document.getElementById("km").value;
-
-  const photo =
-  document.getElementById("photo").files[0];
-
-
-  if(!name){
-
-    alert("Bike Name bharo.");
-
-    return;
-  }
-
-
-  const saveBtn =
-  document.getElementById("saveBtn");
-
-  saveBtn.disabled = true;
-
-  saveBtn.textContent =
-  "Saving...";
-
-
-  try{
-
-    // PHOTO UPLOAD
-    if(photo){
-
-      statusBox.textContent =
-      "📸 Photo upload ho rahi hai...";
-
-      currentImageUrl =
-      await uploadPhoto(photo);
-    }
-
-
-    // DATA
-    const bikeData = {
-
-      name:name,
-
-      model:model || null,
-
-      price:price
-        ? Number(price)
-        : null,
-
-      year:year
-        ? Number(year)
-        : null,
-
-      km:km
-        ? Number(km)
-        : null,
-
-      image_url:
-        currentImageUrl || null
-
-    };
-
-
-    // EDIT
-    if(editingId){
-
-      const {error} =
-      await db
-        .from("bikes")
-        .update(bikeData)
-        .eq("id", editingId);
-
-      if(error) throw error;
-
-      statusBox.textContent =
-      "✅ Bike updated successfully.";
-
-    }
-
-
-    // ADD
-    else{
-
-      const {error} =
-      await db
-        .from("bikes")
-        .insert([bikeData]);
-
-      if(error) throw error;
-
-      statusBox.textContent =
-      "✅ Bike added successfully.";
-
-    }
-
-
-    clearForm();
-
-    formPanel.classList.add("hidden");
-
-    editingId = null;
-
-    currentImageUrl = "";
-
-    await loadBikes();
-
-  }
-
-
-  catch(error){
-
-    console.error(error);
-
-    alert(
-      "Save error: " +
-      error.message
+    showLoginMessage(
+      "Email aur password bharo."
     );
 
+    return;
   }
-
-
-  finally{
-
-    saveBtn.disabled = false;
-
-    saveBtn.textContent =
-    "💾 Save Bike";
-
-  }
-
-});
-
-
-// LOAD BIKES
-async function loadBikes(){
-
-  const list =
-  document.getElementById("bikeList");
-
-  list.innerHTML =
-  "Loading...";
 
 
   const {data,error} =
-  await db
-    .from("bikes")
-    .select("*")
-    .order("id",{ascending:false});
+    await supabaseClient.auth
+      .signInWithPassword({
+        email,
+        password
+      });
+
+
+  if(error){
+
+    showLoginMessage(
+      "Login failed: " + error.message
+    );
+
+    return;
+  }
+
+
+  await checkAdmin();
+}
+
+
+/* =========================
+   CHECK ADMIN
+========================= */
+
+async function checkAdmin(){
+
+  const {
+    data:{user}
+  } =
+    await supabaseClient.auth
+      .getUser();
+
+
+  if(!user){
+
+    showLogin();
+
+    return;
+  }
+
+
+  const {data,error} =
+    await supabaseClient
+      .from("admin_users")
+      .select("id")
+      .eq("user_id",user.id)
+      .maybeSingle();
+
+
+  if(error || !data){
+
+    await supabaseClient.auth.signOut();
+
+    showLoginMessage(
+      "Access denied. Admin account required."
+    );
+
+    return;
+  }
+
+
+  document
+    .getElementById("loginBox")
+    .classList.add("hidden");
+
+
+  document
+    .getElementById("adminPanel")
+    .classList.remove("hidden");
+
+
+  document
+    .getElementById("userEmail")
+    .textContent =
+      user.email;
+
+
+  loadBikes();
+}
+
+
+/* =========================
+   LOGOUT
+========================= */
+
+async function logout(){
+
+  await supabaseClient.auth.signOut();
+
+  editingId = null;
+
+  clearForm();
+
+  showLogin();
+}
+
+
+/* =========================
+   SHOW LOGIN
+========================= */
+
+function showLogin(){
+
+  document
+    .getElementById("loginBox")
+    .classList.remove("hidden");
+
+  document
+    .getElementById("adminPanel")
+    .classList.add("hidden");
+}
+
+
+/* =========================
+   LOAD BIKES
+========================= */
+
+async function loadBikes(){
+
+  const list =
+    document.getElementById("bikeList");
+
+  list.innerHTML =
+    "Loading...";
+
+
+  const {data,error} =
+    await supabaseClient
+      .from("bikes")
+      .select("*")
+      .order(
+        "created_at",
+        {ascending:false}
+      );
 
 
   if(error){
 
     list.innerHTML =
-    "<p>❌ " + error.message + "</p>";
+      "<div class='empty'>Unable to load bikes.</div>";
+
+    console.error(error);
 
     return;
   }
@@ -551,7 +545,7 @@ async function loadBikes(){
   if(!data || data.length === 0){
 
     list.innerHTML =
-    '<p class="muted">Abhi koi bike available nahi hai.</p>';
+      "<div class='empty'>No bikes added yet.</div>";
 
     return;
   }
@@ -560,71 +554,68 @@ async function loadBikes(){
   list.innerHTML = "";
 
 
-  data.forEach(function(bike){
+  data.forEach(bike => {
 
     const div =
-    document.createElement("div");
+      document.createElement("div");
 
     div.className =
-    "bike";
+      "bike";
 
 
-    const name =
-    bike.name ||
-    bike.model ||
-    bike.title ||
-    "Bike";
+    let image = "";
+
+    if(bike.image_url){
+
+      image = `
+        <img
+          src="${escapeHtml(bike.image_url)}"
+          alt="Bike">
+      `;
+    }
 
 
     div.innerHTML = `
 
-      ${
-        bike.image_url
-        ? `<img src="${bike.image_url}" alt="${name}">`
-        : ""
-      }
+      ${image}
 
-      <h3>${name}</h3>
+      <h3>
+        ${escapeHtml(
+          bike.name || "Bike"
+        )}
+      </h3>
 
-      ${
-        bike.price !== null &&
-        bike.price !== undefined
-        ? `<div class="price">₹${bike.price}</div>`
-        : ""
-      }
+      <div class="small">
+        ${escapeHtml(
+          bike.brand || ""
+        )}
+        ${bike.model
+          ? " • " +
+            escapeHtml(bike.model)
+          : ""}
+      </div>
 
-      ${
-        bike.model
-        ? `<span class="tag">Model: ${bike.model}</span>`
-        : ""
-      }
+      <div class="price">
+        ₹${Number(
+          bike.price || 0
+        ).toLocaleString("en-IN")}
+      </div>
 
-      ${
-        bike.year !== null &&
-        bike.year !== undefined
-        ? `<span class="tag">Year: ${bike.year}</span>`
-        : ""
-      }
-
-      ${
-        bike.km !== null &&
-        bike.km !== undefined
-        ? `<span class="tag">KM: ${bike.km}</span>`
-        : ""
-      }
-
-      <br>
+      <p>
+        ${escapeHtml(
+          bike.description || ""
+        )}
+      </p>
 
       <button
-        class="edit"
-        onclick="editBike('${bike.id}')">
-        ✏️ Edit
+        onclick='editBike(${JSON.stringify(bike)})'>
+        EDIT
       </button>
 
       <button
-        class="danger"
+        class="delete"
         onclick="deleteBike('${bike.id}')">
-        🗑️ Delete
+        DELETE
       </button>
 
     `;
@@ -637,112 +628,205 @@ async function loadBikes(){
 }
 
 
-// EDIT
-async function editBike(id){
+/* =========================
+   SAVE BIKE
+========================= */
 
-  const {data,error} =
-  await db
-    .from("bikes")
-    .select("*")
-    .eq("id",id)
-    .single();
+async function saveBike(){
+
+  const name =
+    document
+      .getElementById("bikeName")
+      .value
+      .trim();
+
+  const brand =
+    document
+      .getElementById("brand")
+      .value
+      .trim();
+
+  const model =
+    document
+      .getElementById("model")
+      .value
+      .trim();
+
+  const price =
+    document
+      .getElementById("price")
+      .value;
+
+  const description =
+    document
+      .getElementById("description")
+      .value
+      .trim();
+
+  const image_url =
+    document
+      .getElementById("imageUrl")
+      .value
+      .trim();
 
 
-  if(error){
+  if(!name || !price){
 
-    alert(
-      "Bike load error: " +
-      error.message
+    showMessage(
+      "Bike name aur price required hai."
     );
 
     return;
   }
 
 
-  editingId = id;
+  const bikeData = {
 
-  currentImageUrl =
-  data.image_url || "";
+    name:name,
 
+    brand:brand,
 
-  document.getElementById("name").value =
-  data.name || "";
+    model:model,
 
-  document.getElementById("model").value =
-  data.model || "";
+    price:Number(price),
 
-  document.getElementById("price").value =
-  data.price ?? "";
+    description:description,
 
-  document.getElementById("year").value =
-  data.year ?? "";
+    image_url:image_url
 
-  document.getElementById("km").value =
-  data.km ?? "";
+  };
 
 
-  const preview =
-  document.getElementById("preview");
+  let result;
 
 
-  if(data.image_url){
+  if(editingId){
 
-    preview.src =
-    data.image_url;
+    result =
+      await supabaseClient
+        .from("bikes")
+        .update(bikeData)
+        .eq("id",editingId);
 
-    preview.classList.remove("hidden");
+  }else{
 
-  }
-  else{
-
-    preview.src = "";
-
-    preview.classList.add("hidden");
+    result =
+      await supabaseClient
+        .from("bikes")
+        .insert(bikeData);
 
   }
 
 
-  document.getElementById("photo").value =
-  "";
+  if(result.error){
+
+    console.error(result.error);
+
+    showMessage(
+      result.error.message
+    );
+
+    return;
+  }
 
 
-  document.getElementById("formTitle").textContent =
-  "✏️ Edit Bike";
+  showMessage(
+    editingId
+      ? "Bike updated successfully."
+      : "Bike added successfully."
+  );
 
 
-  formPanel.classList.remove("hidden");
+  clearForm();
 
-
-  window.scrollTo({
-    top:formPanel.offsetTop,
-    behavior:"smooth"
-  });
-
+  loadBikes();
 }
 
 
-// DELETE
+/* =========================
+   EDIT BIKE
+========================= */
+
+function editBike(bike){
+
+  editingId =
+    bike.id;
+
+
+  document
+    .getElementById("formTitle")
+    .textContent =
+      "Edit Bike";
+
+
+  document
+    .getElementById("bikeName")
+    .value =
+      bike.name || "";
+
+
+  document
+    .getElementById("brand")
+    .value =
+      bike.brand || "";
+
+
+  document
+    .getElementById("model")
+    .value =
+      bike.model || "";
+
+
+  document
+    .getElementById("price")
+    .value =
+      bike.price || "";
+
+
+  document
+    .getElementById("description")
+    .value =
+      bike.description || "";
+
+
+  document
+    .getElementById("imageUrl")
+    .value =
+      bike.image_url || "";
+
+
+  window.scrollTo({
+    top:0,
+    behavior:"smooth"
+  });
+}
+
+
+/* =========================
+   DELETE
+========================= */
+
 async function deleteBike(id){
 
   const ok =
-  confirm(
-    "Kya aap ye bike delete karna chahte ho?"
-  );
+    confirm(
+      "Delete this bike?"
+    );
+
 
   if(!ok) return;
 
 
   const {error} =
-  await db
-    .from("bikes")
-    .delete()
-    .eq("id",id);
+    await supabaseClient
+      .from("bikes")
+      .delete()
+      .eq("id",id);
 
 
   if(error){
 
-    alert(
-      "Delete error: " +
+    showMessage(
       error.message
     );
 
@@ -750,64 +834,155 @@ async function deleteBike(id){
   }
 
 
-  statusBox.textContent =
-  "🗑️ Bike deleted successfully.";
+  showMessage(
+    "Bike deleted."
+  );
+
 
   loadBikes();
-
 }
 
 
-// CLEAR FORM
+/* =========================
+   CLEAR
+========================= */
+
 function clearForm(){
 
-  document.getElementById("name").value = "";
+  editingId = null;
 
-  document.getElementById("model").value = "";
 
-  document.getElementById("price").value = "";
+  document
+    .getElementById("formTitle")
+    .textContent =
+      "Add New Bike";
 
-  document.getElementById("year").value = "";
 
-  document.getElementById("km").value = "";
+  document
+    .getElementById("bikeName")
+    .value = "";
 
-  document.getElementById("photo").value = "";
 
-  document.getElementById("preview").src = "";
+  document
+    .getElementById("brand")
+    .value = "";
 
-  document.getElementById("preview")
-    .classList.add("hidden");
 
+  document
+    .getElementById("model")
+    .value = "";
+
+
+  document
+    .getElementById("price")
+    .value = "";
+
+
+  document
+    .getElementById("description")
+    .value = "";
+
+
+  document
+    .getElementById("imageUrl")
+    .value = "";
 }
 
 
-// REFRESH
-document.getElementById("refreshBtn")
-.addEventListener("click", function(){
+/* =========================
+   MESSAGES
+========================= */
 
-  loadBikes();
+function showMessage(text){
 
-});
+  const box =
+    document.getElementById("message");
+
+  box.textContent =
+    text;
+
+  box.style.display =
+    "block";
 
 
-// CHECK SESSION
-async function checkSession(){
+  setTimeout(()=>{
+    box.style.display =
+      "none";
+  },4000);
+}
 
-  const {data} =
-  await db.auth.getSession();
 
-  if(data.session){
+function showLoginMessage(text){
 
-    showAdmin();
+  const box =
+    document.getElementById(
+      "loginMessage"
+    );
+
+  box.textContent =
+    text;
+
+  box.style.display =
+    "block";
+}
+
+
+/* =========================
+   SECURITY DISPLAY
+========================= */
+
+function escapeHtml(value){
+
+  return String(value)
+
+    .replaceAll(
+      "&",
+      "&amp;"
+    )
+
+    .replaceAll(
+      "<",
+      "&lt;"
+    )
+
+    .replaceAll(
+      ">",
+      "&gt;"
+    )
+
+    .replaceAll(
+      '"',
+      "&quot;"
+    )
+
+    .replaceAll(
+      "'",
+      "&#039;"
+    );
+}
+
+
+/* =========================
+   SESSION CHECK
+========================= */
+
+supabaseClient.auth
+.onAuthStateChange(
+  async (event,session)=>{
+
+    if(session){
+
+      await checkAdmin();
+
+    }
 
   }
+);
 
-}
 
-
-checkSession();
+checkAdmin();
 
 </script>
 
 </body>
-</html>
+</html>list.innerHTML
