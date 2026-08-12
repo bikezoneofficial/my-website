@@ -1,14 +1,59 @@
-<!doctype html>
-<html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Bike Zone</title>
-<style>
-body{margin:0;background:#080808;color:#fff;font-family:Arial,sans-serif}.top{padding:18px 6%;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #282828;position:sticky;top:0;background:#080808ee;z-index:5}.logo{font-size:26px;font-weight:900}.logo span{color:#ff6b00}.top a{color:#aaa;text-decoration:none}.hero{padding:65px 6%;background:linear-gradient(135deg,#1a1a1a,#080808)}h1{font-size:44px;margin:0 0 10px}.muted{color:#999}.wrap{padding:30px 6%}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:20px}.card{background:#151515;border:1px solid #292929;border-radius:16px;overflow:hidden}.card img{width:100%;height:220px;object-fit:cover;background:#222}.pad{padding:16px}.price{font-size:23px;font-weight:800;color:#ff913d}.tag{display:inline-block;background:#252525;padding:7px 9px;border-radius:8px;margin:4px 3px;font-size:13px}.btn{display:inline-block;padding:11px 16px;border-radius:10px;background:#ff6b00;color:#fff;text-decoration:none;font-weight:700;margin:5px 5px 0 0}.empty{text-align:center;color:#888;padding:40px}.contact{margin-top:40px;padding:20px;background:#121212;border:1px solid #292929;border-radius:16px}
-</style></head><body>
-<header class="top"><div class="logo">BIKE <span>ZONE</span></div><a href="admin.html">Admin</a></header>
-<section class="hero"><h1>Find Your Next Bike.</h1><p class="muted">Photos • Price • Model • Year • KM • Complete Details</p></section>
-<main class="wrap"><h2>Available Bikes</h2><div id="list" class="grid"><div class="empty">Website is ready. Supabase connection will be added here.</div></div>
-<section class="contact"><h2>Contact Bike Zone</h2><p class="muted">WhatsApp: <span id="phone"></span></p><a id="waGroup" class="btn" target="_blank">WhatsApp Group</a><a id="ig" class="btn" target="_blank">Instagram Group</a><a id="wa" class="btn" target="_blank">Chat on WhatsApp</a></section></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SETTINGS={phone:"8878051833",waGroup:"https://chat.whatsapp.com/D3imghlgY9CIcJSDmlt5i6?s=cl&p=a&ilr=4",instagram:"https://ig.me/j/AbY_sSpxRI66eGM3/"};
-phone.textContent=SETTINGS.phone;waGroup.href=SETTINGS.waGroup;ig.href=SETTINGS.instagram;wa.href="https://wa.me/91"+SETTINGS.phone;
-</script></body></html>
+const SUPABASE_URL="https://jwvuyvqejoweyyhexonh.supabase.co";
+const SUPABASE_KEY="sb_publishable_9xr4-mJuetYNknBqMVvcYA_7OzE6CDm";
+
+const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+const SETTINGS={
+  phone:"8878051833",
+  waGroup:"https://chat.whatsapp.com/D3imghlgY9CIcJSDmlt5i6?s=cl&p=a&ilr=4",
+  instagram:"https://ig.me/j/AbY_sSpxRI66eGM3/"
+};
+
+document.getElementById("phone").textContent=SETTINGS.phone;
+document.getElementById("waGroup").href=SETTINGS.waGroup;
+document.getElementById("ig").href=SETTINGS.instagram;
+document.getElementById("wa").href="https://wa.me/91"+SETTINGS.phone;
+
+async function loadBikes(){
+  const list=document.getElementById("list");
+
+  const {data,error}=await db
+    .from("bikes")
+    .select("*");
+
+  if(error){
+    console.error(error);
+    list.innerHTML='<div class="empty">Bikes load nahi ho pa rahe.</div>';
+    return;
+  }
+
+  if(!data || data.length===0){
+    list.innerHTML='<div class="empty">Abhi koi bike available nahi hai.</div>';
+    return;
+  }
+
+  list.innerHTML=data.map(bike=>{
+    const name=bike.name || bike.model || bike.title || "Bike";
+    const price=bike.price ? "₹"+bike.price : "";
+    const year=bike.year ? "Year: "+bike.year : "";
+    const km=bike.km ? "KM: "+bike.km : "";
+    const image=bike.image_url || "";
+
+    return `
+      <article class="card">
+        ${image ? `<img src="${image}" alt="${name}">` : ""}
+        <div class="pad">
+          <h3>${name}</h3>
+          ${price ? `<div class="price">${price}</div>` : ""}
+          ${year ? `<span class="tag">${year}</span>` : ""}
+          ${km ? `<span class="tag">${km}</span>` : ""}
+        </div>
+      </article>
+    `;
+  }).join("");
+}
+
+loadBikes();
+</script>
