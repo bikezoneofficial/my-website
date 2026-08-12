@@ -9,23 +9,90 @@
 
   <style>
     *{box-sizing:border-box}
-    body{margin:0;background:#090909;color:#fff;font-family:Arial,sans-serif}
-    .wrap{max-width:850px;margin:auto;padding:25px 18px 60px}
-    .panel{background:#151515;border:1px solid #292929;border-radius:18px;padding:22px;margin-bottom:20px}
+    body{
+      margin:0;
+      background:#090909;
+      color:#fff;
+      font-family:Arial,sans-serif
+    }
+    .wrap{
+      max-width:850px;
+      margin:auto;
+      padding:25px 18px 60px
+    }
+    .panel{
+      background:#151515;
+      border:1px solid #292929;
+      border-radius:18px;
+      padding:22px;
+      margin-bottom:20px
+    }
     h1{margin-top:0}
-    input{width:100%;padding:13px;margin:7px 0;background:#0d0d0d;color:#fff;border:1px solid #383838;border-radius:10px;font-size:16px}
-    button{padding:12px 17px;margin:6px 5px 6px 0;border:0;border-radius:10px;background:#ff6b00;color:#fff;font-weight:bold;font-size:15px}
+    input{
+      width:100%;
+      padding:13px;
+      margin:7px 0;
+      background:#0d0d0d;
+      color:#fff;
+      border:1px solid #383838;
+      border-radius:10px;
+      font-size:16px
+    }
+    button{
+      padding:12px 17px;
+      margin:6px 5px 6px 0;
+      border:0;
+      border-radius:10px;
+      background:#ff6b00;
+      color:#fff;
+      font-weight:bold;
+      font-size:15px
+    }
     button.secondary{background:#444}
     button.danger{background:#b82020}
     button.edit{background:#555}
+    button:disabled{opacity:.6}
     .hidden{display:none}
     .muted{color:#999}
-    .status{padding:12px;background:#202020;border-radius:10px;margin-top:12px}
-    .bike{background:#101010;border:1px solid #292929;border-radius:14px;padding:15px;margin-top:14px}
-    .bike img{width:100%;max-height:250px;object-fit:cover;border-radius:10px}
-    .price{font-size:22px;font-weight:bold;color:#ff913d;margin:8px 0}
-    .tag{display:inline-block;background:#292929;padding:7px 9px;border-radius:8px;margin:3px}
-    #preview{width:100%;max-height:250px;object-fit:cover;border-radius:10px;margin-top:10px}
+    .status{
+      padding:12px;
+      background:#202020;
+      border-radius:10px;
+      margin-top:12px
+    }
+    .bike{
+      background:#101010;
+      border:1px solid #292929;
+      border-radius:14px;
+      padding:15px;
+      margin-top:14px
+    }
+    .bike img{
+      width:100%;
+      max-height:250px;
+      object-fit:cover;
+      border-radius:10px
+    }
+    .price{
+      font-size:22px;
+      font-weight:bold;
+      color:#ff913d;
+      margin:8px 0
+    }
+    .tag{
+      display:inline-block;
+      background:#292929;
+      padding:7px 9px;
+      border-radius:8px;
+      margin:3px
+    }
+    #preview{
+      width:100%;
+      max-height:250px;
+      object-fit:cover;
+      border-radius:10px;
+      margin-top:10px
+    }
   </style>
 </head>
 
@@ -118,6 +185,7 @@ window.supabase.createClient(
 );
 
 let editingId = null;
+let currentImageUrl = "";
 
 
 // ELEMENTS
@@ -145,33 +213,38 @@ document.getElementById("loginBtn")
 .addEventListener("click", async function(){
 
   const email =
-    document.getElementById("email").value.trim();
+  document.getElementById("email").value.trim();
 
   const password =
-    document.getElementById("password").value;
+  document.getElementById("password").value;
 
   if(!email || !password){
+
     loginMessage.textContent =
-      "Email aur password bharo.";
+    "Email aur password bharo.";
+
     return;
   }
 
   loginMessage.textContent =
-    "Login ho raha hai...";
+  "Login ho raha hai...";
 
   const {error} =
-    await db.auth.signInWithPassword({
-      email:email,
-      password:password
-    });
+  await db.auth.signInWithPassword({
+    email:email,
+    password:password
+  });
 
   if(error){
 
     loginMessage.textContent =
-      "Login failed: " + error.message;
+    "Login failed: " + error.message;
 
     return;
   }
+
+  loginMessage.textContent =
+  "Login successful!";
 
   showAdmin();
 
@@ -209,10 +282,12 @@ document.getElementById("addBtn")
 
   editingId = null;
 
+  currentImageUrl = "";
+
   clearForm();
 
   document.getElementById("formTitle").textContent =
-    "➕ Add Bike";
+  "➕ Add Bike";
 
   formPanel.classList.remove("hidden");
 
@@ -242,21 +317,61 @@ document.getElementById("photo")
   const file = this.files[0];
 
   const preview =
-    document.getElementById("preview");
+  document.getElementById("preview");
 
   if(!file){
-
-    preview.classList.add("hidden");
 
     return;
   }
 
   preview.src =
-    URL.createObjectURL(file);
+  URL.createObjectURL(file);
 
   preview.classList.remove("hidden");
 
 });
+
+
+// UPLOAD PHOTO
+async function uploadPhoto(file){
+
+  if(!file){
+    return currentImageUrl || null;
+  }
+
+  const extension =
+  file.name.split(".").pop().toLowerCase();
+
+  const fileName =
+  "bike-" +
+  Date.now() +
+  "-" +
+  Math.random().toString(36).substring(2) +
+  "." +
+  extension;
+
+  const filePath =
+  fileName;
+
+  const {error} =
+  await db.storage
+    .from("bike-images")
+    .upload(filePath, file, {
+      cacheControl:"3600",
+      upsert:false
+    });
+
+  if(error){
+    throw error;
+  }
+
+  const {data} =
+  db.storage
+    .from("bike-images")
+    .getPublicUrl(filePath);
+
+  return data.publicUrl;
+}
 
 
 // SAVE
@@ -264,19 +379,22 @@ document.getElementById("saveBtn")
 .addEventListener("click", async function(){
 
   const name =
-    document.getElementById("name").value.trim();
+  document.getElementById("name").value.trim();
 
   const model =
-    document.getElementById("model").value.trim();
+  document.getElementById("model").value.trim();
 
   const price =
-    document.getElementById("price").value;
+  document.getElementById("price").value;
 
   const year =
-    document.getElementById("year").value;
+  document.getElementById("year").value;
 
   const km =
-    document.getElementById("km").value;
+  document.getElementById("km").value;
+
+  const photo =
+  document.getElementById("photo").files[0];
 
 
   if(!name){
@@ -287,66 +405,82 @@ document.getElementById("saveBtn")
   }
 
 
-  const bikeData = {
-
-    name:name,
-
-    model:model || null,
-
-    price:price
-      ? Number(price)
-      : null,
-
-    year:year
-      ? Number(year)
-      : null,
-
-    km:km
-      ? Number(km)
-      : null
-
-  };
-
-
   const saveBtn =
-    document.getElementById("saveBtn");
+  document.getElementById("saveBtn");
 
   saveBtn.disabled = true;
 
   saveBtn.textContent =
-    "Saving...";
+  "Saving...";
 
 
   try{
+
+    // PHOTO UPLOAD
+    if(photo){
+
+      statusBox.textContent =
+      "📸 Photo upload ho rahi hai...";
+
+      currentImageUrl =
+      await uploadPhoto(photo);
+    }
+
+
+    // DATA
+    const bikeData = {
+
+      name:name,
+
+      model:model || null,
+
+      price:price
+        ? Number(price)
+        : null,
+
+      year:year
+        ? Number(year)
+        : null,
+
+      km:km
+        ? Number(km)
+        : null,
+
+      image_url:
+        currentImageUrl || null
+
+    };
+
 
     // EDIT
     if(editingId){
 
       const {error} =
-        await db
-          .from("bikes")
-          .update(bikeData)
-          .eq("id", editingId);
+      await db
+        .from("bikes")
+        .update(bikeData)
+        .eq("id", editingId);
 
       if(error) throw error;
 
       statusBox.textContent =
-        "✅ Bike updated successfully.";
+      "✅ Bike updated successfully.";
 
     }
+
 
     // ADD
     else{
 
       const {error} =
-        await db
-          .from("bikes")
-          .insert([bikeData]);
+      await db
+        .from("bikes")
+        .insert([bikeData]);
 
       if(error) throw error;
 
       statusBox.textContent =
-        "✅ Bike added successfully.";
+      "✅ Bike added successfully.";
 
     }
 
@@ -357,9 +491,12 @@ document.getElementById("saveBtn")
 
     editingId = null;
 
+    currentImageUrl = "";
+
     await loadBikes();
 
   }
+
 
   catch(error){
 
@@ -372,12 +509,13 @@ document.getElementById("saveBtn")
 
   }
 
+
   finally{
 
     saveBtn.disabled = false;
 
     saveBtn.textContent =
-      "💾 Save Bike";
+    "💾 Save Bike";
 
   }
 
@@ -388,23 +526,23 @@ document.getElementById("saveBtn")
 async function loadBikes(){
 
   const list =
-    document.getElementById("bikeList");
+  document.getElementById("bikeList");
 
   list.innerHTML =
-    "Loading...";
+  "Loading...";
 
 
   const {data,error} =
-    await db
-      .from("bikes")
-      .select("*")
-      .order("id",{ascending:false});
+  await db
+    .from("bikes")
+    .select("*")
+    .order("id",{ascending:false});
 
 
   if(error){
 
     list.innerHTML =
-      "<p>❌ " + error.message + "</p>";
+    "<p>❌ " + error.message + "</p>";
 
     return;
   }
@@ -413,7 +551,7 @@ async function loadBikes(){
   if(!data || data.length === 0){
 
     list.innerHTML =
-      '<p class="muted">Abhi koi bike available nahi hai.</p>';
+    '<p class="muted">Abhi koi bike available nahi hai.</p>';
 
     return;
   }
@@ -425,17 +563,17 @@ async function loadBikes(){
   data.forEach(function(bike){
 
     const div =
-      document.createElement("div");
+    document.createElement("div");
 
     div.className =
-      "bike";
+    "bike";
 
 
     const name =
-      bike.name ||
-      bike.model ||
-      bike.title ||
-      "Bike";
+    bike.name ||
+    bike.model ||
+    bike.title ||
+    "Bike";
 
 
     div.innerHTML = `
@@ -449,7 +587,8 @@ async function loadBikes(){
       <h3>${name}</h3>
 
       ${
-        bike.price
+        bike.price !== null &&
+        bike.price !== undefined
         ? `<div class="price">₹${bike.price}</div>`
         : ""
       }
@@ -461,13 +600,15 @@ async function loadBikes(){
       }
 
       ${
-        bike.year
+        bike.year !== null &&
+        bike.year !== undefined
         ? `<span class="tag">Year: ${bike.year}</span>`
         : ""
       }
 
       ${
-        bike.km
+        bike.km !== null &&
+        bike.km !== undefined
         ? `<span class="tag">KM: ${bike.km}</span>`
         : ""
       }
@@ -500,11 +641,11 @@ async function loadBikes(){
 async function editBike(id){
 
   const {data,error} =
-    await db
-      .from("bikes")
-      .select("*")
-      .eq("id",id)
-      .single();
+  await db
+    .from("bikes")
+    .select("*")
+    .eq("id",id)
+    .single();
 
 
   if(error){
@@ -520,25 +661,53 @@ async function editBike(id){
 
   editingId = id;
 
+  currentImageUrl =
+  data.image_url || "";
+
 
   document.getElementById("name").value =
-    data.name || "";
+  data.name || "";
 
   document.getElementById("model").value =
-    data.model || "";
+  data.model || "";
 
   document.getElementById("price").value =
-    data.price || "";
+  data.price ?? "";
 
   document.getElementById("year").value =
-    data.year || "";
+  data.year ?? "";
 
   document.getElementById("km").value =
-    data.km || "";
+  data.km ?? "";
+
+
+  const preview =
+  document.getElementById("preview");
+
+
+  if(data.image_url){
+
+    preview.src =
+    data.image_url;
+
+    preview.classList.remove("hidden");
+
+  }
+  else{
+
+    preview.src = "";
+
+    preview.classList.add("hidden");
+
+  }
+
+
+  document.getElementById("photo").value =
+  "";
 
 
   document.getElementById("formTitle").textContent =
-    "✏️ Edit Bike";
+  "✏️ Edit Bike";
 
 
   formPanel.classList.remove("hidden");
@@ -556,18 +725,18 @@ async function editBike(id){
 async function deleteBike(id){
 
   const ok =
-    confirm(
-      "Kya aap ye bike delete karna chahte ho?"
-    );
+  confirm(
+    "Kya aap ye bike delete karna chahte ho?"
+  );
 
   if(!ok) return;
 
 
   const {error} =
-    await db
-      .from("bikes")
-      .delete()
-      .eq("id",id);
+  await db
+    .from("bikes")
+    .delete()
+    .eq("id",id);
 
 
   if(error){
@@ -582,7 +751,7 @@ async function deleteBike(id){
 
 
   statusBox.textContent =
-    "🗑️ Bike deleted successfully.";
+  "🗑️ Bike deleted successfully.";
 
   loadBikes();
 
@@ -625,7 +794,7 @@ document.getElementById("refreshBtn")
 async function checkSession(){
 
   const {data} =
-    await db.auth.getSession();
+  await db.auth.getSession();
 
   if(data.session){
 
@@ -634,6 +803,7 @@ async function checkSession(){
   }
 
 }
+
 
 checkSession();
 
