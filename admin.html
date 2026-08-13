@@ -86,13 +86,6 @@
       border-radius:8px;
       margin:3px
     }
-    #preview{
-      width:100%;
-      max-height:250px;
-      object-fit:cover;
-      border-radius:10px;
-      margin-top:10px
-    }
   </style>
 </head>
 
@@ -144,14 +137,12 @@
     <input id="year" type="number" placeholder="Year">
     <input id="km" type="number" placeholder="KM Driven">
 
-    <p class="muted">Bike Photo</p>
-
-    <h3>📸 Bike Photos — 5 Photos</h3>
-<input id="photo1" type="file" accept="image/*">
-<input id="photo2" type="file" accept="image/*">
-<input id="photo3" type="file" accept="image/*">
-<input id="photo4" type="file" accept="image/*">
-<input id="photo5" type="file" accept="image/*">
+    <p class="muted">📸 Bike Photos — up to 5 photos</p>
+<label>Photo 1</label><input id="photo1" type="file" accept="image/*">
+<label>Photo 2</label><input id="photo2" type="file" accept="image/*">
+<label>Photo 3</label><input id="photo3" type="file" accept="image/*">
+<label>Photo 4</label><input id="photo4" type="file" accept="image/*">
+<label>Photo 5</label><input id="photo5" type="file" accept="image/*">
 <div id="photoPreviews"></div>
 
     <button id="saveBtn">💾 Save Bike</button>
@@ -356,7 +347,21 @@ document.getElementById("cancelBtn")
 });
 
 
-// UPLOAD PHOTO// UPLOAD PHOTO
+// PHOTO PREVIEWS
+for(let i=1;i<=5;i++){
+  const input=document.getElementById("photo"+i);
+  input.addEventListener("change",function(){
+    const file=this.files[0];
+    if(!file)return;
+    const img=document.createElement("img");
+    img.src=URL.createObjectURL(file);
+    img.style.cssText="width:140px;height:100px;object-fit:cover;border-radius:10px;margin:5px;";
+    document.getElementById("photoPreviews").appendChild(img);
+  });
+}
+
+
+// UPLOAD PHOTO
 async function uploadPhoto(file){
 
   if(!file){
@@ -417,7 +422,13 @@ document.getElementById("saveBtn")
   const km =
   document.getElementById("km").value;
 
-  const photo =
+  const photos=[];
+  for(let i=1;i<=5;i++){
+    const input=document.getElementById("photo"+i);
+    photos.push(input.files[0] || null);
+  }
+
+
   if(!name){
 
     alert("Bike Name bharo.");
@@ -438,13 +449,9 @@ document.getElementById("saveBtn")
   try{
 
     // PHOTO UPLOAD
-    if(photo){
-
-      statusBox.textContent =
-      "📸 Photo upload ho rahi hai...";
-
-      currentImageUrl =
-      await uploadPhoto(photo);
+    if(photos[0]){
+      statusBox.textContent="📸 Photo upload ho rahi hai...";
+      currentImageUrl=await uploadPhoto(photos[0]);
     }
 
 
@@ -702,22 +709,20 @@ async function editBike(id){
   data.km ?? "";
 
 
-  const preview =
-  if(data.image_url){
-
-    preview.src =
-    data.image_url;
-
-    preview.classList.remove("hidden");
-
+  const photoPreviews=document.getElementById("photoPreviews");
+  if(photoPreviews){
+    photoPreviews.innerHTML="";
+    if(data.image_url){
+      const img=document.createElement("img");
+      img.src=data.image_url;
+      img.style.cssText="width:140px;height:100px;object-fit:cover;border-radius:10px;margin:5px;";
+      photoPreviews.appendChild(img);
+    }
   }
-  else{
 
-    preview.src = "";
 
-    preview.classList.add("hidden");
-
-  }
+  document.getElementById("photo").value =
+  "";
 
 
   document.getElementById("formTitle").textContent =
@@ -785,7 +790,13 @@ function clearForm(){
 
   document.getElementById("km").value = "";
 
+  for(let i=1;i<=5;i++){
+    document.getElementById("photo"+i).value="";
   }
+
+  document.getElementById("photoPreviews").innerHTML="";
+
+}
 
 
 // REFRESH
