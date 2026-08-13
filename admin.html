@@ -86,20 +86,60 @@
       border-radius:8px;
       margin:3px
     }
-    #preview{
-      width:100%;
-      max-height:250px;
-      object-fit:cover;
-      border-radius:10px;
+
+    #photoPreviews{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
       margin-top:10px
     }
-  
-.gallery{position:relative;width:100%;margin-bottom:10px}
-.gallery-img{width:100%;height:250px;object-fit:cover;border-radius:10px;display:block}
-.gallery-prev,.gallery-next{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;padding:0;margin:0;border-radius:50%;background:rgba(0,0,0,.78);color:#fff;font-size:30px;line-height:40px;z-index:2}
-.gallery-prev{left:10px}.gallery-next{right:10px}
-.gallery-count{position:absolute;right:10px;bottom:10px;background:rgba(0,0,0,.78);padding:5px 9px;border-radius:8px;font-size:13px}
-</style>
+    #photoPreviews img{
+      width:120px;
+      height:85px;
+      object-fit:cover;
+      border-radius:10px;
+      border:1px solid #383838
+    }
+    .gallery{
+      position:relative;
+      width:100%;
+      margin-bottom:10px
+    }
+    .gallery-img{
+      width:100%;
+      height:250px;
+      object-fit:cover;
+      border-radius:10px;
+      display:block
+    }
+    .gallery-btn{
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      width:44px;
+      height:44px;
+      padding:0;
+      margin:0;
+      border-radius:50%;
+      background:rgba(0,0,0,.78);
+      color:#fff;
+      font-size:30px;
+      line-height:40px;
+      z-index:2
+    }
+    .gallery-prev{left:10px}
+    .gallery-next{right:10px}
+    .gallery-count{
+      position:absolute;
+      right:10px;
+      bottom:10px;
+      background:rgba(0,0,0,.78);
+      padding:5px 9px;
+      border-radius:8px;
+      font-size:13px
+    }
+
+  </style>
 </head>
 
 <body>
@@ -150,13 +190,25 @@
     <input id="year" type="number" placeholder="Year">
     <input id="km" type="number" placeholder="KM Driven">
 
-    <p class="muted">Bike Photo</p>
+    <p class="muted">📸 Bike Photos — up to 5 photos</p>
 
-    <input id="photo" type="file" accept="image/*">
+    <label>Photo 1</label>
+    <input id="photo1" type="file" accept="image/*">
 
-    <img id="preview" class="hidden">
+    <label>Photo 2</label>
+    <input id="photo2" type="file" accept="image/*">
 
-    <button id="saveBtn">💾 Save Bike</button>
+    <label>Photo 3</label>
+    <input id="photo3" type="file" accept="image/*">
+
+    <label>Photo 4</label>
+    <input id="photo4" type="file" accept="image/*">
+
+    <label>Photo 5</label>
+    <input id="photo5" type="file" accept="image/*">
+
+    <div id="photoPreviews"></div>
+<button id="saveBtn">💾 Save Bike</button>
     <button id="cancelBtn" class="secondary">Cancel</button>
 
   </div>
@@ -190,78 +242,51 @@ window.supabase.createClient(
   SUPABASE_KEY
 );
 
+
 let editingId = null;
-let currentImageUrl = "";
+let currentImageUrls = ["","","","",""];
+let galleryPhotos = {};
 
 
 // ELEMENTS
-const loginPanel =
-document.getElementById("loginPanel");
-
-const adminPanel =
-document.getElementById("adminPanel");
-
-const formPanel =
-document.getElementById("formPanel");
-
-const listPanel =
-document.getElementById("listPanel");
-
-const loginMessage =
-document.getElementById("loginMessage");
-
-const statusBox =
-document.getElementById("status");
+const loginPanel = document.getElementById("loginPanel");
+const adminPanel = document.getElementById("adminPanel");
+const formPanel = document.getElementById("formPanel");
+const listPanel = document.getElementById("listPanel");
+const loginMessage = document.getElementById("loginMessage");
+const statusBox = document.getElementById("status");
 
 
 // LOGIN
-document.getElementById("loginBtn")
-.addEventListener("click", async function(){
-
-  const email =
-  document.getElementById("email").value.trim();
-
-  const password =
-  document.getElementById("password").value;
+document.getElementById("loginBtn").addEventListener("click", async function(){
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
 
   if(!email || !password){
-
-    loginMessage.textContent =
-    "Email aur password bharo.";
-
+    loginMessage.textContent = "Email aur password bharo.";
     return;
   }
 
-  loginMessage.textContent =
-  "Login ho raha hai...";
+  loginMessage.textContent = "Login ho raha hai...";
 
-  const {error} =
-  await db.auth.signInWithPassword({
-    email:email,
-    password:password
+  const {error} = await db.auth.signInWithPassword({
+    email: email,
+    password: password
   });
 
   if(error){
-
-    loginMessage.textContent =
-    "Login failed: " + error.message;
-
+    loginMessage.textContent = "Login failed: " + error.message;
     return;
   }
 
-  loginMessage.textContent =
-  "Login successful! Checking admin access...";
-
+  loginMessage.textContent = "Login successful! Checking admin access...";
   await checkAdmin();
-
 });
 
 
 // CHECK ADMIN ACCESS
 async function checkAdmin(){
-
-  const {data:{user}} =
-    await db.auth.getUser();
+  const {data:{user}} = await db.auth.getUser();
 
   if(!user){
     loginPanel.classList.remove("hidden");
@@ -271,15 +296,13 @@ async function checkAdmin(){
     return false;
   }
 
-  const {data,error} =
-    await db
-      .from("admin_users")
-      .select("user_id")
-      .eq("user_id", user.id)
-      .maybeSingle();
+  const {data,error} = await db
+    .from("admin_users")
+    .select("user_id")
+    .eq("user_id", user.id)
+    .maybeSingle();
 
   if(error || !data){
-
     await db.auth.signOut();
 
     loginPanel.classList.remove("hidden");
@@ -287,9 +310,7 @@ async function checkAdmin(){
     formPanel.classList.add("hidden");
     listPanel.classList.add("hidden");
 
-    loginMessage.textContent =
-      "Access denied. Ye account admin nahi hai.";
-
+    loginMessage.textContent = "Access denied. Ye account admin nahi hai.";
     return false;
   }
 
@@ -299,475 +320,392 @@ async function checkAdmin(){
 
 
 // SHOW ADMIN
-
 function showAdmin(){
-
   loginPanel.classList.add("hidden");
-
   adminPanel.classList.remove("hidden");
-
   listPanel.classList.remove("hidden");
-
   loadBikes();
-
 }
 
 
 // LOGOUT
-document.getElementById("logoutBtn")
-.addEventListener("click", async function(){
-
+document.getElementById("logoutBtn").addEventListener("click", async function(){
   await db.auth.signOut();
-
   location.reload();
-
 });
 
 
 // ADD BUTTON
-document.getElementById("addBtn")
-.addEventListener("click", function(){
-
+document.getElementById("addBtn").addEventListener("click", function(){
   editingId = null;
-
-  currentImageUrl = "";
-
+  currentImageUrls = ["","","","",""];
   clearForm();
 
-  document.getElementById("formTitle").textContent =
-  "➕ Add Bike";
-
+  document.getElementById("formTitle").textContent = "➕ Add Bike";
   formPanel.classList.remove("hidden");
 
   window.scrollTo({
-    top:formPanel.offsetTop,
-    behavior:"smooth"
+    top: formPanel.offsetTop,
+    behavior: "smooth"
   });
-
 });
 
 
 // CANCEL
-document.getElementById("cancelBtn")
-.addEventListener("click", function(){
-
+document.getElementById("cancelBtn").addEventListener("click", function(){
   formPanel.classList.add("hidden");
-
+  editingId = null;
   clearForm();
-
 });
 
 
-// PHOTO PREVIEW
-document.getElementById("photo1")
-.addEventListener("change", function(){
+// PHOTO PREVIEWS
+for(let i=1;i<=5;i++){
+  document.getElementById("photo"+i).addEventListener("change", function(){
+    const file = this.files[0];
+    if(!file) return;
 
-  const file = this.files[0];
-
-  const preview =
-  document.getElementById("photoPreviews");
-
-  if(!file){
-
-    return;
-  }
-
-  preview.src =
-  URL.createObjectURL(file);
-
-  preview.classList.remove("hidden");
-
-});
+    const img = document.createElement("img");
+    img.src = URL.createObjectURL(file);
+    img.alt = "Photo " + i;
+    document.getElementById("photoPreviews").appendChild(img);
+  });
+}
 
 
 // UPLOAD PHOTO
 async function uploadPhoto(file){
+  if(!file) return null;
 
-  if(!file){
-    return currentImageUrl || null;
-  }
-
-  const extension =
-  file.name.split(".").pop().toLowerCase();
-
+  const extension = file.name.split(".").pop().toLowerCase();
   const fileName =
-  "bike-" +
-  Date.now() +
-  "-" +
-  Math.random().toString(36).substring(2) +
-  "." +
-  extension;
+    "bike-" +
+    Date.now() +
+    "-" +
+    Math.random().toString(36).substring(2) +
+    "." +
+    extension;
 
-  const filePath =
-  fileName;
-
-  const {error} =
-  await db.storage
+  const {error} = await db.storage
     .from("bike-images")
-    .upload(filePath, file, {
-      cacheControl:"3600",
-      upsert:false
+    .upload(fileName, file, {
+      cacheControl: "3600",
+      upsert: false
     });
 
-  if(error){
-    throw error;
-  }
+  if(error) throw error;
 
-  const {data} =
-  db.storage
+  const {data} = db.storage
     .from("bike-images")
-    .getPublicUrl(filePath);
+    .getPublicUrl(fileName);
 
   return data.publicUrl;
 }
 
 
-// SAVE
-document.getElementById("saveBtn")
-.addEventListener("click", async function(){
-
-  const name =
-  document.getElementById("name").value.trim();
-
-  const model =
-  document.getElementById("model").value.trim();
-
-  const price =
-  document.getElementById("price").value;
-
-  const year =
-  document.getElementById("year").value;
-
-  const km =
-  document.getElementById("km").value;
-
-  const photo =
-  document.getElementById("photo1").files[0];
-
+// SAVE BIKE
+document.getElementById("saveBtn").addEventListener("click", async function(){
+  const name = document.getElementById("name").value.trim();
+  const model = document.getElementById("model").value.trim();
+  const price = document.getElementById("price").value;
+  const year = document.getElementById("year").value;
+  const km = document.getElementById("km").value;
 
   if(!name){
-
     alert("Bike Name bharo.");
-
     return;
   }
 
-
-  const saveBtn =
-  document.getElementById("saveBtn");
-
+  const saveBtn = document.getElementById("saveBtn");
   saveBtn.disabled = true;
-
-  saveBtn.textContent =
-  "Saving...";
-
+  saveBtn.textContent = "Saving...";
 
   try{
+    // Upload only the photos selected this time.
+    for(let i=1;i<=5;i++){
+      const file = document.getElementById("photo"+i).files[0];
 
-    // PHOTO UPLOAD
-    if(photo){
-
-      statusBox.textContent =
-      "📸 Photo upload ho rahi hai...";
-
-      currentImageUrl =
-      await uploadPhoto(photo);
+      if(file){
+        statusBox.textContent = "📸 Photo " + i + " upload ho rahi hai...";
+        currentImageUrls[i-1] = await uploadPhoto(file);
+      }
     }
 
-
-    // DATA
     const bikeData = {
-
-      name:name,
-
-      model:model || null,
-
-      price:price
-        ? Number(price)
-        : null,
-
-      year:year
-        ? Number(year)
-        : null,
-
-      km:km
-        ? Number(km)
-        : null,
-
-      image_url:
-        currentImageUrl || null
-
+      name: name,
+      model: model || null,
+      price: price ? Number(price) : null,
+      year: year ? Number(year) : null,
+      km: km ? Number(km) : null,
+      image_url: currentImageUrls[0] || null,
+      image_url_2: currentImageUrls[1] || null,
+      image_url_3: currentImageUrls[2] || null,
+      image_url_4: currentImageUrls[3] || null,
+      image_url_5: currentImageUrls[4] || null
     };
 
-
-    // EDIT
     if(editingId){
-
-      const {error} =
-      await db
+      const {error} = await db
         .from("bikes")
         .update(bikeData)
         .eq("id", editingId);
 
       if(error) throw error;
 
-      statusBox.textContent =
-      "✅ Bike updated successfully.";
-
-    }
-
-
-    // ADD
-    else{
-
-      const {error} =
-      await db
+      statusBox.textContent = "✅ Bike updated successfully.";
+    }else{
+      const {error} = await db
         .from("bikes")
         .insert([bikeData]);
 
       if(error) throw error;
 
-      statusBox.textContent =
-      "✅ Bike added successfully.";
-
+      statusBox.textContent = "✅ Bike added successfully.";
     }
 
-
-    clearForm();
-
-    formPanel.classList.add("hidden");
-
     editingId = null;
-
-    currentImageUrl = "";
+    currentImageUrls = ["","","","",""];
+    clearForm();
+    formPanel.classList.add("hidden");
 
     await loadBikes();
 
-  }
-
-
-  catch(error){
-
+  }catch(error){
     console.error(error);
-
-    alert(
-      "Save error: " +
-      error.message
-    );
-
-  }
-
-
-  finally{
-
+    alert("Save error: " + error.message);
+  }finally{
     saveBtn.disabled = false;
-
-    saveBtn.textContent =
-    "💾 Save Bike";
-
+    saveBtn.textContent = "💾 Save Bike";
   }
-
 });
 
 
 // LOAD BIKES
 async function loadBikes(){
-  const list=document.getElementById("bikeList");
-  list.innerHTML="Loading...";
+  const list = document.getElementById("bikeList");
+  list.innerHTML = "Loading...";
+  galleryPhotos = {};
 
-  const {data,error}=await db.from("bikes").select("*").order("id",{ascending:false});
+  const {data,error} = await db
+    .from("bikes")
+    .select("*")
+    .order("id",{ascending:false});
 
   if(error){
-    list.innerHTML="<p>❌ "+error.message+"</p>";
+    list.innerHTML = "<p>❌ " + error.message + "</p>";
     return;
   }
 
-  if(!data || !data.length){
-    list.innerHTML='<p class="muted">Abhi koi bike available nahi hai.</p>';
+  if(!data || data.length === 0){
+    list.innerHTML = '<p class="muted">Abhi koi bike available nahi hai.</p>';
     return;
   }
 
-  list.innerHTML="";
-  window.__bikePhotos={};
+  list.innerHTML = "";
 
   data.forEach(function(bike){
-    const div=document.createElement("div");
-    div.className="bike";
+    const div = document.createElement("div");
+    div.className = "bike";
 
-    const name=bike.name||bike.model||bike.title||"Bike";
-    const photos=[
-      bike.image_url,bike.image_url_2,bike.image_url_3,
-      bike.image_url_4,bike.image_url_5
+    const name = bike.name || bike.model || bike.title || "Bike";
+
+    const photos = [
+      bike.image_url,
+      bike.image_url_2,
+      bike.image_url_3,
+      bike.image_url_4,
+      bike.image_url_5
     ].filter(Boolean);
 
-    const galleryId="gallery-"+bike.id;
-    window.__bikePhotos[galleryId]=photos;
+    const galleryId = "gallery-" + bike.id;
+    galleryPhotos[galleryId] = photos;
 
-    div.innerHTML=`
-      ${photos.length ? `
-        <div class="gallery" id="${galleryId}" data-index="0">
-          <img class="gallery-img" src="${photos[0]}" alt="${name}">
-          ${photos.length>1 ? `
-            <button type="button" class="gallery-prev" onclick="changePhoto('${galleryId}',-1)">‹</button>
-            <button type="button" class="gallery-next" onclick="changePhoto('${galleryId}',1)">›</button>
-            <div class="gallery-count">1 / ${photos.length}</div>
-          `:""}
-        </div>`:""}
+    div.innerHTML = `
+      ${
+        photos.length
+        ? `
+          <div class="gallery" id="${galleryId}" data-index="0">
+            <img class="gallery-img" src="${photos[0]}" alt="${name}">
+            ${
+              photos.length > 1
+              ? `
+                <button type="button" class="gallery-btn gallery-prev"
+                  onclick="changePhoto('${galleryId}',-1)">‹</button>
+                <button type="button" class="gallery-btn gallery-next"
+                  onclick="changePhoto('${galleryId}',1)">›</button>
+                <div class="gallery-count">1 / ${photos.length}</div>
+              `
+              : ""
+            }
+          </div>
+        `
+        : ""
+      }
 
       <h3>${name}</h3>
-      ${bike.price!=null ? `<div class="price">₹${bike.price}</div>`:""}
-      ${bike.model ? `<span class="tag">Model: ${bike.model}</span>`:""}
-      ${bike.year!=null ? `<span class="tag">Year: ${bike.year}</span>`:""}
-      ${bike.km!=null ? `<span class="tag">KM: ${bike.km}</span>`:""}
+
+      ${
+        bike.price !== null && bike.price !== undefined
+        ? `<div class="price">₹${bike.price}</div>`
+        : ""
+      }
+
+      ${
+        bike.model
+        ? `<span class="tag">Model: ${bike.model}</span>`
+        : ""
+      }
+
+      ${
+        bike.year !== null && bike.year !== undefined
+        ? `<span class="tag">Year: ${bike.year}</span>`
+        : ""
+      }
+
+      ${
+        bike.km !== null && bike.km !== undefined
+        ? `<span class="tag">KM: ${bike.km}</span>`
+        : ""
+      }
+
       <br>
-      <button type="button" class="edit" onclick="editBike('${bike.id}')">✏️ Edit</button>
-      <button type="button" class="danger" onclick="deleteBike('${bike.id}')">🗑️ Delete</button>
+
+      <button type="button" class="edit"
+        onclick="editBike('${bike.id}')">✏️ Edit</button>
+
+      <button type="button" class="danger"
+        onclick="deleteBike('${bike.id}')">🗑️ Delete</button>
     `;
 
     list.appendChild(div);
   });
 }
 
-function changePhoto(galleryId,direction){
-  const photos=(window.__bikePhotos||{})[galleryId];
-  const gallery=document.getElementById(galleryId);
-  if(!photos || !gallery || photos.length<2) return;
 
-  let index=Number(gallery.dataset.index||0);
-  index=(index+direction+photos.length)%photos.length;
-  gallery.dataset.index=index;
+// PHOTO CAROUSEL
+function changePhoto(galleryId, direction){
+  const photos = galleryPhotos[galleryId];
+  const gallery = document.getElementById(galleryId);
 
-  gallery.querySelector(".gallery-img").src=photos[index];
+  if(!photos || !gallery || photos.length < 2) return;
 
-  const count=gallery.querySelector(".gallery-count");
-  if(count) count.textContent=(index+1)+" / "+photos.length;
+  let index = Number(gallery.dataset.index || 0);
+  index = (index + direction + photos.length) % photos.length;
+
+  gallery.dataset.index = index;
+  gallery.querySelector(".gallery-img").src = photos[index];
+
+  const count = gallery.querySelector(".gallery-count");
+  if(count){
+    count.textContent = (index + 1) + " / " + photos.length;
+  }
 }
+
 
 // EDIT
 async function editBike(id){
-  const {data,error}=await db.from("bikes").select("*").eq("id",id).single();
+  const {data,error} = await db
+    .from("bikes")
+    .select("*")
+    .eq("id", id)
+    .single();
 
   if(error){
-    alert("Bike load error: "+error.message);
+    alert("Bike load error: " + error.message);
     return;
   }
 
-  editingId=id;
-  currentImageUrls=[
-    data.image_url||"",
-    data.image_url_2||"",
-    data.image_url_3||"",
-    data.image_url_4||"",
-    data.image_url_5||""
+  editingId = id;
+
+  currentImageUrls = [
+    data.image_url || "",
+    data.image_url_2 || "",
+    data.image_url_3 || "",
+    data.image_url_4 || "",
+    data.image_url_5 || ""
   ];
-  currentImageUrl=currentImageUrls[0]||"";
 
-  document.getElementById("name").value=data.name||"";
-  document.getElementById("model").value=data.model||"";
-  document.getElementById("price").value=data.price??"";
-  document.getElementById("year").value=data.year??"";
-  document.getElementById("km").value=data.km??"";
+  document.getElementById("name").value = data.name || "";
+  document.getElementById("model").value = data.model || "";
+  document.getElementById("price").value = data.price ?? "";
+  document.getElementById("year").value = data.year ?? "";
+  document.getElementById("km").value = data.km ?? "";
 
-  for(let i=1;i<=5;i++) document.getElementById("photo"+i).value="";
+  for(let i=1;i<=5;i++){
+    document.getElementById("photo"+i).value = "";
+  }
 
-  const box=document.getElementById("photoPreviews");
-  box.innerHTML="";
+  const previews = document.getElementById("photoPreviews");
+  previews.innerHTML = "";
+
   currentImageUrls.forEach(function(url,index){
     if(url){
-      const img=document.createElement("img");
-      img.src=url;
-      img.alt="Photo "+(index+1);
-      img.style.cssText="width:140px;height:100px;object-fit:cover;border-radius:10px;margin:5px;";
-      box.appendChild(img);
+      const img = document.createElement("img");
+      img.src = url;
+      img.alt = "Photo " + (index + 1);
+      previews.appendChild(img);
     }
   });
 
-  document.getElementById("formTitle").textContent="✏️ Edit Bike";
+  document.getElementById("formTitle").textContent = "✏️ Edit Bike";
   formPanel.classList.remove("hidden");
-  window.scrollTo({top:formPanel.offsetTop,behavior:"smooth"});
+
+  window.scrollTo({
+    top: formPanel.offsetTop,
+    behavior: "smooth"
+  });
 }
+
 
 // DELETE
 async function deleteBike(id){
+  if(!confirm("Kya aap ye bike delete karna chahte ho?")) return;
 
-  const ok =
-  confirm(
-    "Kya aap ye bike delete karna chahte ho?"
-  );
-
-  if(!ok) return;
-
-
-  const {error} =
-  await db
+  const {error} = await db
     .from("bikes")
     .delete()
-    .eq("id",id);
-
+    .eq("id", id);
 
   if(error){
-
-    alert(
-      "Delete error: " +
-      error.message
-    );
-
+    alert("Delete error: " + error.message);
     return;
   }
 
-
-  statusBox.textContent =
-  "🗑️ Bike deleted successfully.";
-
-  loadBikes();
-
+  statusBox.textContent = "🗑️ Bike deleted successfully.";
+  await loadBikes();
 }
 
 
 // CLEAR FORM
 function clearForm(){
-
   document.getElementById("name").value = "";
-
   document.getElementById("model").value = "";
-
   document.getElementById("price").value = "";
-
   document.getElementById("year").value = "";
-
   document.getElementById("km").value = "";
 
-  document.getElementById("photo1").value = "";
+  for(let i=1;i<=5;i++){
+    document.getElementById("photo"+i).value = "";
+  }
 
-  document.getElementById("photoPreviews").src = "";
-
-  document.getElementById("photoPreviews")
-    .classList.add("hidden");
-
+  document.getElementById("photoPreviews").innerHTML = "";
 }
 
 
 // REFRESH
-document.getElementById("refreshBtn")
-.addEventListener("click", function(){
-
+document.getElementById("refreshBtn").addEventListener("click", function(){
   loadBikes();
-
 });
 
 
 // CHECK SESSION
 async function checkSession(){
-
-  const {data} =
-  await db.auth.getSession();
+  const {data} = await db.auth.getSession();
 
   if(data.session){
     await checkAdmin();
   }
-
 }
-
 
 checkSession();
 
