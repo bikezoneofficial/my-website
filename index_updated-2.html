@@ -1,0 +1,1194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Bike Zone | Buy & Sell Bikes</title>
+
+<style>
+:root{
+  --bg:#070707;
+  --panel:#111;
+  --panel2:#171717;
+  --line:#2b2b2b;
+  --text:#f5f5f5;
+  --muted:#a4a4a4;
+  --white:#fff;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,sans-serif;
+}
+
+/* HEADER */
+.top{
+  position:sticky;
+  top:0;
+  z-index:20;
+  padding:10px 5%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:16px;
+  background:rgba(7,7,7,.96);
+  border-bottom:1px solid var(--line);
+  backdrop-filter:blur(12px);
+}
+
+.logo-box{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  text-decoration:none;
+  color:#fff;
+}
+
+.logo-icon{
+  width:45px;
+  height:45px;
+  border:2px solid #fff;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:24px;
+  background:#111;
+}
+
+.logo-text{
+  font-size:24px;
+  font-weight:900;
+  letter-spacing:-1px;
+}
+
+.logo-text span{
+  color:#fff;
+}
+
+.nav{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.nav a{
+  text-decoration:none;
+  color:#ddd;
+  font-weight:700;
+}
+
+.nav-link{
+  padding:10px 12px;
+}
+
+.sell{
+  background:#fff;
+  color:#050505!important;
+  padding:12px 16px;
+  border-radius:10px;
+  font-weight:900;
+  white-space:nowrap;
+  border:2px solid #fff;
+}
+
+.sell:hover{
+  background:#ddd;
+}
+
+.lang{
+  display:flex;
+  gap:4px;
+  background:#151515;
+  border:1px solid #333;
+  border-radius:9px;
+  padding:3px;
+}
+
+.lang button{
+  border:0;
+  background:transparent;
+  color:#aaa;
+  padding:7px 9px;
+  border-radius:7px;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.lang button.active{
+  background:#fff;
+  color:#050505;
+}
+
+/* HERO */
+.hero{
+  padding:75px 5% 78px;
+  background:
+    radial-gradient(
+      circle at 82% 45%,
+      rgba(255,255,255,.08),
+      transparent 30%
+    ),
+    linear-gradient(
+      125deg,
+      #141414,
+      #070707 65%
+    );
+  border-bottom:1px solid var(--line);
+}
+
+.hero-inner{
+  max-width:850px;
+}
+
+.eyebrow{
+  font-size:13px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:#c8c8c8;
+  font-weight:900;
+}
+
+h1{
+  font-size:clamp(42px,7vw,76px);
+  line-height:1;
+  margin:14px 0 18px;
+  letter-spacing:-2px;
+}
+
+.hero p{
+  font-size:18px;
+  line-height:1.65;
+  color:var(--muted);
+  max-width:700px;
+}
+
+.actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:26px;
+}
+
+/* BUTTONS */
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:13px 17px;
+  border-radius:10px;
+  text-decoration:none;
+  font-weight:900;
+  border:1px solid #444;
+}
+
+.btn-white{
+  background:#fff;
+  color:#050505;
+  border-color:#fff;
+}
+
+.btn-dark{
+  background:#171717;
+  color:#fff;
+}
+
+.btn:hover{
+  opacity:.88;
+}
+
+/* MAIN */
+.wrap{
+  max-width:1250px;
+  margin:auto;
+  padding:42px 5% 70px;
+}
+
+.section-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:end;
+  gap:20px;
+  margin-bottom:22px;
+}
+
+.section-head h2{
+  font-size:30px;
+  margin:0;
+}
+
+.section-head p{
+  color:var(--muted);
+  margin:6px 0 0;
+}
+
+/* BIKE GRID */
+.grid{
+  display:grid;
+  grid-template-columns:
+    repeat(auto-fit,minmax(280px,1fr));
+  gap:20px;
+}
+
+.card{
+  background:
+    linear-gradient(
+      180deg,
+      var(--panel2),
+      var(--panel)
+    );
+  border:1px solid var(--line);
+  border-radius:18px;
+  overflow:hidden;
+  transition:.2s ease;
+}
+
+.card:hover{
+  transform:translateY(-3px);
+  border-color:#555;
+}
+
+.card img{
+  display:block;
+  width:100%;
+  height:235px;
+  object-fit:cover;
+  background:#0b0b0b;
+}
+
+.pad{
+  padding:18px;
+}
+
+.card h3{
+  font-size:22px;
+  margin:0 0 10px;
+}
+
+.price{
+  font-size:25px;
+  font-weight:900;
+  color:#fff;
+  margin:8px 0 12px;
+}
+
+.tag{
+  display:inline-block;
+  background:#242424;
+  border:1px solid #333;
+  padding:7px 9px;
+  border-radius:8px;
+  margin:3px;
+  color:#ddd;
+  font-size:13px;
+}
+
+.card-actions{
+  display:flex;
+  gap:8px;
+  margin-top:15px;
+}
+
+.card-actions .btn{
+  flex:1;
+  font-size:13px;
+  padding:11px 9px;
+}
+
+.empty{
+  text-align:center;
+  color:#888;
+  padding:45px;
+  border:1px dashed #333;
+  border-radius:16px;
+}
+
+/* 5-PHOTO CAROUSEL */
+.photo-slider{
+  position:relative;
+  width:100%;
+  height:235px;
+  overflow:hidden;
+  background:#0b0b0b;
+}
+
+.photo-track{
+  display:flex;
+  width:100%;
+  height:100%;
+  transition:transform .25s ease;
+}
+
+.photo-slide{
+  min-width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.photo-btn{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  width:44px;
+  height:44px;
+  border:0;
+  border-radius:50%;
+  background:rgba(0,0,0,.72);
+  color:#fff;
+  font-size:28px;
+  font-weight:900;
+  cursor:pointer;
+  z-index:2;
+}
+
+.photo-btn.prev{left:12px;}
+.photo-btn.next{right:12px;}
+
+.photo-count{
+  position:absolute;
+  right:12px;
+  bottom:12px;
+  background:rgba(0,0,0,.75);
+  color:#fff;
+  padding:6px 10px;
+  border-radius:9px;
+  font-size:13px;
+  font-weight:900;
+  z-index:2;
+}
+
+.photo-dots{
+  position:absolute;
+  left:50%;
+  bottom:12px;
+  transform:translateX(-50%);
+  display:flex;
+  gap:6px;
+  z-index:2;
+}
+
+.photo-dot{
+  width:7px;
+  height:7px;
+  border:0;
+  border-radius:50%;
+  padding:0;
+  background:#aaa;
+  cursor:pointer;
+}
+
+.photo-dot.active{
+  background:#fff;
+  transform:scale(1.25);
+}
+
+@media(max-width:700px){
+  .photo-slider{height:230px;}
+}
+
+/* CONTACT */
+.contact{
+  margin-top:42px;
+  padding:28px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:#111;
+}
+
+.contact h2{
+  margin-top:0;
+}
+
+.contact p{
+  color:var(--muted);
+  line-height:1.6;
+}
+
+.contact-actions{
+  display:flex;
+  gap:9px;
+  flex-wrap:wrap;
+}
+
+/* FLOATING WHATSAPP */
+.float-wa{
+  position:fixed;
+  right:18px;
+  bottom:18px;
+  z-index:30;
+  background:#fff;
+  color:#050505;
+  border:2px solid #fff;
+  border-radius:999px;
+  padding:13px 17px;
+  font-weight:900;
+  text-decoration:none;
+  box-shadow:0 8px 28px rgba(0,0,0,.4);
+}
+
+/* FOOTER */
+footer{
+  border-top:1px solid var(--line);
+  padding:24px 5%;
+  text-align:center;
+  color:#777;
+  font-size:13px;
+}
+
+/* MOBILE */
+@media(max-width:700px){
+
+  .top{
+    padding:8px 4%;
+  }
+
+  .logo-icon{
+    width:40px;
+    height:40px;
+    font-size:21px;
+  }
+
+  .logo-text{
+    font-size:20px;
+  }
+
+  .nav-link{
+    display:none;
+  }
+
+  .sell{
+    padding:10px 12px;
+    font-size:13px;
+  }
+
+  .lang button{
+    padding:6px 7px;
+  }
+
+  .hero{
+    padding:58px 5% 62px;
+  }
+
+  h1{
+    letter-spacing:-1px;
+  }
+
+  .hero p{
+    font-size:16px;
+  }
+
+  .section-head{
+    display:block;
+  }
+
+  .grid{
+    grid-template-columns:1fr;
+  }
+
+  .card img{
+    height:230px;
+  }
+
+  .float-wa{
+    right:12px;
+    bottom:12px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header class="top">
+
+  <a href="#top" class="logo-box">
+    <div class="logo-icon">🏍️</div>
+    <div class="logo-text">
+      BIKE <span>ZONE</span>
+    </div>
+  </a>
+
+  <nav class="nav">
+
+    <a
+      class="nav-link"
+      href="#bikes"
+      data-en="Bikes"
+      data-hi="बाइक्स">
+      Bikes
+    </a>
+
+    <a
+      class="nav-link"
+      href="#contact"
+      data-en="Contact"
+      data-hi="संपर्क">
+      Contact
+    </a>
+
+    <div class="lang">
+      <button id="enBtn" class="active">EN</button>
+      <button id="hiBtn">हिं</button>
+    </div>
+
+    <a
+      class="sell"
+      id="sellTop"
+      target="_blank"
+      rel="noopener">
+      💬
+      <span
+        data-en="Sell My Bike"
+        data-hi="अपनी बाइक बेचें">
+        Sell My Bike
+      </span>
+    </a>
+
+  </nav>
+
+</header>
+
+
+<!-- HERO -->
+<section class="hero" id="top">
+
+  <div class="hero-inner">
+
+    <div
+      class="eyebrow"
+      data-en="Bike Zone • Ride • Buy • Sell"
+      data-hi="बाइक ज़ोन • राइड • खरीदें • बेचें">
+      Bike Zone • Ride • Buy • Sell
+    </div>
+
+    <h1
+      data-en="Find your next bike."
+      data-hi="अपनी अगली बाइक खोजें।">
+      Find your next bike.
+    </h1>
+
+    <p
+      data-en="Quality bikes, clear details and real photos. Browse our latest inventory and contact Bike Zone directly on WhatsApp for price, availability or a test-drive enquiry."
+      data-hi="अच्छी क्वालिटी की बाइक्स, साफ जानकारी और असली फोटो। हमारी लेटेस्ट बाइक्स देखें और कीमत, उपलब्धता या टेस्ट राइड के लिए सीधे WhatsApp पर संपर्क करें।">
+      Quality bikes, clear details and real photos.
+      Browse our latest inventory and contact Bike Zone
+      directly on WhatsApp for price, availability or a
+      test-drive enquiry.
+    </p>
+
+    <div class="actions">
+
+      <a
+        class="btn btn-white"
+        href="#bikes"
+        data-en="Browse Bikes"
+        data-hi="बाइक्स देखें">
+        Browse Bikes
+      </a>
+
+      <a
+        class="btn btn-dark"
+        id="sellHero"
+        target="_blank"
+        rel="noopener">
+        💬
+        <span
+          data-en="Sell My Bike on WhatsApp"
+          data-hi="WhatsApp पर बाइक बेचें">
+          Sell My Bike on WhatsApp
+        </span>
+      </a>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- MAIN -->
+<main class="wrap">
+
+  <!-- BIKES -->
+  <section id="bikes">
+
+    <div class="section-head">
+
+      <div>
+
+        <h2
+          data-en="Available Bikes"
+          data-hi="उपलब्ध बाइक्स">
+          Available Bikes
+        </h2>
+
+        <p
+          data-en="Live inventory from Bike Zone"
+          data-hi="Bike Zone की लाइव इन्वेंटरी">
+          Live inventory from Bike Zone
+        </p>
+
+      </div>
+
+    </div>
+
+    <div id="list" class="grid">
+
+      <div
+        class="empty"
+        data-en="Loading bikes..."
+        data-hi="बाइक्स लोड हो रही हैं...">
+        Loading bikes...
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- CONTACT -->
+  <section class="contact" id="contact">
+
+    <h2
+      data-en="Want to sell your bike?"
+      data-hi="अपनी बाइक बेचना चाहते हैं?">
+      Want to sell your bike?
+    </h2>
+
+    <p
+      data-en="Send your bike details and photos on WhatsApp. We will get back to you with the next steps."
+      data-hi="अपनी बाइक की जानकारी और फोटो WhatsApp पर भेजें। हम आपको आगे की जानकारी देंगे।">
+      Send your bike details and photos on WhatsApp.
+      We will get back to you with the next steps.
+    </p>
+
+    <div class="contact-actions">
+
+      <a
+        id="wa"
+        class="btn btn-white"
+        target="_blank"
+        rel="noopener">
+        💬
+        <span
+          data-en="Chat on WhatsApp"
+          data-hi="WhatsApp चैट">
+          Chat on WhatsApp
+        </span>
+      </a>
+
+      <a
+        id="waGroup"
+        class="btn btn-dark"
+        target="_blank"
+        rel="noopener">
+        WhatsApp Group
+      </a>
+
+      <a
+        id="ig"
+        class="btn btn-dark"
+        target="_blank"
+        rel="noopener">
+        Instagram
+      </a>
+
+    </div>
+
+  </section>
+
+</main>
+
+
+<!-- FLOATING WHATSAPP -->
+<a
+  id="floatWa"
+  class="float-wa"
+  target="_blank"
+  rel="noopener">
+  💬 WhatsApp
+</a>
+
+
+<!-- FOOTER -->
+<footer>
+  © 2026 Bike Zone • Ride • Buy • Sell
+</footer>
+
+
+<!-- SUPABASE -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+const SUPABASE_URL =
+"https://jwvuyvqejoweyyhexonh.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_9xr4-mJuetYNknBqMVvcYA_7OzE6CDm";
+
+const db =
+window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+
+/* CONTACT SETTINGS */
+const SETTINGS = {
+
+  phone:"8878051833",
+
+  waGroup:
+  "https://chat.whatsapp.com/CIA7NgxqFSC06W2EdXTPgR?s=cl&p=a&mlu=4",
+
+  instagram:
+  "https://ig.me/j/AbY_sSpxRI66eGM3/"
+
+};
+
+
+/* SELL BIKE WHATSAPP */
+const sellMessage =
+encodeURIComponent(
+  "Hello Bike Zone, I want to sell my bike. Please share the details I need to send."
+);
+
+const sellUrl =
+"https://wa.me/91" +
+SETTINGS.phone +
+"?text=" +
+sellMessage;
+
+
+document.getElementById("sellTop").href =
+sellUrl;
+
+document.getElementById("sellHero").href =
+sellUrl;
+
+
+/* NORMAL WHATSAPP */
+const waUrl =
+"https://wa.me/91" +
+SETTINGS.phone +
+"?text=" +
+encodeURIComponent(
+  "Hello Bike Zone, I want to know more about a bike."
+);
+
+
+document.getElementById("wa").href =
+waUrl;
+
+document.getElementById("floatWa").href =
+waUrl;
+
+document.getElementById("waGroup").href =
+SETTINGS.waGroup;
+
+document.getElementById("ig").href =
+SETTINGS.instagram;
+
+
+/* LANGUAGE */
+let lang = "en";
+
+
+function setLang(next){
+
+  lang = next;
+
+  document.documentElement.lang =
+    next === "hi" ? "hi" : "en";
+
+  document
+    .querySelectorAll("[data-en]")
+    .forEach(el => {
+
+      el.textContent =
+        el.dataset[next];
+
+    });
+
+
+  document
+    .getElementById("enBtn")
+    .classList
+    .toggle(
+      "active",
+      next === "en"
+    );
+
+
+  document
+    .getElementById("hiBtn")
+    .classList
+    .toggle(
+      "active",
+      next === "hi"
+    );
+
+
+  loadBikes();
+
+}
+
+
+document.getElementById("enBtn").onclick =
+() => setLang("en");
+
+document.getElementById("hiBtn").onclick =
+() => setLang("hi");
+
+
+/* HTML ESCAPE */
+function esc(v){
+
+  return String(v ?? "")
+    .replace(
+      /[&<>"']/g,
+      m => ({
+        "&":"&amp;",
+        "<":"&lt;",
+        ">":"&gt;",
+        '"':"&quot;",
+        "'":"&#039;"
+      }[m])
+    );
+
+}
+
+
+/* LOAD BIKES FROM SUPABASE */
+async function loadBikes(){
+
+  const list =
+    document.getElementById("list");
+
+
+  list.innerHTML =
+    `<div class="empty">
+      ${
+        lang === "hi"
+        ? "बाइक्स लोड हो रही हैं..."
+        : "Loading bikes..."
+      }
+    </div>`;
+
+
+  const {
+    data,
+    error
+  } =
+  await db
+    .from("bikes")
+    .select("*")
+    .order(
+      "id",
+      {ascending:false}
+    );
+
+
+  if(error){
+
+    console.error(error);
+
+    list.innerHTML =
+      `<div class="empty">
+        ${
+          lang === "hi"
+          ? "बाइक्स लोड नहीं हो पा रही हैं।"
+          : "Bikes could not be loaded."
+        }
+      </div>`;
+
+    return;
+
+  }
+
+
+  if(!data || !data.length){
+
+    list.innerHTML =
+      `<div class="empty">
+        ${
+          lang === "hi"
+          ? "अभी कोई बाइक उपलब्ध नहीं है।"
+          : "No bikes are available right now."
+        }
+      </div>`;
+
+    return;
+
+  }
+
+
+  list.innerHTML =
+  data.map(bike => {
+
+    const name =
+      esc(
+        bike.name ||
+        bike.model ||
+        bike.title ||
+        "Bike"
+      );
+
+
+    const price =
+      bike.price !== null &&
+      bike.price !== undefined &&
+      bike.price !== ""
+      ?
+      "₹" +
+      Number(
+        bike.price
+      ).toLocaleString("en-IN")
+      :
+      "";
+
+
+    const year =
+      bike.year
+      ?
+      `${
+        lang === "hi"
+        ? "साल"
+        : "Year"
+      }: ${esc(bike.year)}`
+      :
+      "";
+
+
+    const km =
+      bike.km !== null &&
+      bike.km !== undefined &&
+      bike.km !== ""
+      ?
+      `${
+        lang === "hi"
+        ? "किमी"
+        : "KM"
+      }: ${
+        Number(
+          bike.km
+        ).toLocaleString("en-IN")
+      }`
+      :
+      "";
+
+
+    const model =
+      bike.model
+      ?
+      `${
+        lang === "hi"
+        ? "मॉडल"
+        : "Model"
+      }: ${esc(bike.model)}`
+      :
+      "";
+
+
+    const images = [
+      bike.image_url,
+      bike.image_url_2,
+      bike.image_url_3,
+      bike.image_url_4,
+      bike.image_url_5
+    ].filter(Boolean);
+
+    const sliderId =
+      "slider-" + String(bike.id || Math.random()).replace(/[^a-zA-Z0-9_-]/g, "");
+
+
+    const msg =
+      encodeURIComponent(
+        `Hello Bike Zone, I am interested in ${
+          bike.name ||
+          bike.model ||
+          "this bike"
+        }. Please share details.`
+      );
+
+
+    return `
+
+      <article class="card">
+
+        ${
+          images.length
+          ?
+          `
+          <div class="photo-slider" id="${sliderId}">
+            <div class="photo-track">
+              ${images.map((url, i) => `
+                <img
+                  class="photo-slide"
+                  src="${esc(url)}"
+                  alt="${name} - Photo ${i + 1}"
+                  loading="lazy">
+              `).join("")}
+            </div>
+            ${images.length > 1 ? `
+              <button class="photo-btn prev" type="button" aria-label="Previous photo" onclick="changePhoto('${sliderId}', -1)">‹</button>
+              <button class="photo-btn next" type="button" aria-label="Next photo" onclick="changePhoto('${sliderId}', 1)">›</button>
+              <div class="photo-count"><span class="photo-current">1</span> / ${images.length}</div>
+              <div class="photo-dots">
+                ${images.map((_, i) => `
+                  <button class="photo-dot ${i === 0 ? 'active' : ''}" type="button" aria-label="Photo ${i + 1}" onclick="goPhoto('${sliderId}', ${i})"></button>
+                `).join("")}
+              </div>
+            ` : ""}
+          </div>
+          `
+          :
+          ""
+        }
+
+        <div class="pad">
+
+          <h3>
+            ${name}
+          </h3>
+
+          ${
+            price
+            ?
+            `
+            <div class="price">
+              ${price}
+            </div>
+            `
+            :
+            ""
+          }
+
+          <div>
+
+            ${
+              model
+              ?
+              `
+              <span class="tag">
+                ${model}
+              </span>
+              `
+              :
+              ""
+            }
+
+            ${
+              year
+              ?
+              `
+              <span class="tag">
+                ${year}
+              </span>
+              `
+              :
+              ""
+            }
+
+            ${
+              km
+              ?
+              `
+              <span class="tag">
+                ${km}
+              </span>
+              `
+              :
+              ""
+            }
+
+          </div>
+
+
+          <div class="card-actions">
+
+            <a
+              class="btn btn-white"
+              target="_blank"
+              rel="noopener"
+              href="https://wa.me/91${SETTINGS.phone}?text=${msg}">
+              💬 WhatsApp
+            </a>
+
+            <a
+              class="btn btn-dark"
+              href="#contact">
+              ${
+                lang === "hi"
+                ? "संपर्क"
+                : "Contact"
+              }
+            </a>
+
+          </div>
+
+        </div>
+
+      </article>
+
+    `;
+
+  }).join("");
+
+}
+
+
+/* 5-PHOTO SLIDER CONTROLS */
+function goPhoto(id, index){
+  const slider = document.getElementById(id);
+  if(!slider) return;
+  const track = slider.querySelector('.photo-track');
+  const slides = slider.querySelectorAll('.photo-slide');
+  if(!slides.length) return;
+
+  let current = Math.max(0, Math.min(index, slides.length - 1));
+  track.dataset.index = current;
+  track.style.transform = `translateX(-${current * 100}%)`;
+
+  slider.querySelectorAll('.photo-dot').forEach((dot, i) => {
+    dot.classList.toggle('active', i === current);
+  });
+
+  const count = slider.querySelector('.photo-current');
+  if(count) count.textContent = current + 1;
+}
+
+function changePhoto(id, direction){
+  const slider = document.getElementById(id);
+  if(!slider) return;
+  const track = slider.querySelector('.photo-track');
+  const slides = slider.querySelectorAll('.photo-slide');
+  if(!slides.length) return;
+
+  const current = Number(track.dataset.index || 0);
+  const next = (current + direction + slides.length) % slides.length;
+  goPhoto(id, next);
+}
+
+/* START */
+loadBikes();
+
+</script>
+
+</body>
+</html>
